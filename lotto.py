@@ -11,7 +11,7 @@ infile = open("lottosorted.txt","r")
 line = 'junk'
 while line:
 	line = infile.readline()
-	print line
+	sys.stdout.write(line)
 	
 col1 = lottocol(1,40)
 
