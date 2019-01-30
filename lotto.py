@@ -9,6 +9,7 @@ class matrix:
         self.col.append(col(27))
         self.firstDraw=1375
         self.lastDraw=0
+        self.numDraws=0
 class col:
     def __init__(self,numBalls):
         self.numBalls=numBalls
@@ -35,21 +36,25 @@ class lottoBall:
         self.lastDiffs=[]
         self.probScore=0
 
-fileData=[]
-lineData=[]
+def file_len(fname): #Get Nuber of Draws in File
+    with open(fname) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
+
 drawAndDate=[]
 charLineData=[]
-#intLineData=[] Commented out 12/4
-unSortedHits={}
+testLen=100
 slp=matrix()
-matrixLength=0
+slp.numDraws=file_len("allnumbers.txt")
+slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
-rawFileData=reversed(inFile.readlines())
-for rawLineData in rawFileData:
+for drawNum in range(slp.firstDraw,slp.lastDraw - testLen):
+    rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
-    matrixLength+=1
+    #matrixLength+=1
     for x in range(1,7):
         slp.col[x].ball[int(charLineData[x])].hitMatrix.append(drawNumber) #append number to balls hitMatrix
         slp.col[x].ball[int(charLineData[x])].hits += 1 #add 1 to balls hitlist
