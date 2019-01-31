@@ -54,11 +54,22 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen):
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
-    #matrixLength+=1
+    currentBallIndex=0
     for x in range(1,7):
-        slp.col[x].ball[int(charLineData[x])].hitMatrix.append(drawNumber) #append number to balls hitMatrix
-        slp.col[x].ball[int(charLineData[x])].hits += 1 #add 1 to balls hitlist
-        slp.col[x].ball[int(charLineData[x])].lastHit=drawNumber
+        currentBallIndex=int(charLineData[x])
+        slp.col[x].ball[currentBallIndex].hitMatrix.append(drawNumber) #append number to balls hitMatrix
+        slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to balls hitlist
+        if slp.col[x].ball[currentBallIndex].lastHit != 0:
+            currentDiff=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit)
+        else:
+            currentDiff=drawNumber-(slp.firstDraw)
+        slp.col[x].ball[currentBallIndex].diffMatrix.append(currentDiff)
+        slp.col[x].ball[currentBallIndex].lastHit=drawNumber
 slp.lastDraw=drawNumber
+#for testNum in range(1,testLen):
+#   rawLineData=infFile.readline()
+#    charLineData=rawLineData.split('          ') #split number fields
+#    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
+#    drawNumber=int(drawAndDate[0])
 
         
