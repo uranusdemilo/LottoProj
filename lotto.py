@@ -1,3 +1,5 @@
+import operator
+
 class matrix:
     def __init__(self):
         self.col=[0]
@@ -18,10 +20,17 @@ class col:
         self.mostHits=0
         self.leastCommon=0
         self.mostCommon=0
-        self.sortedHits=[]
+        self.unsortedHits={}
+        self.sortedHits={}
         ###Instantiate Balls in Row
-        for x in range(1,numBalls + 1):
-            self.ball.append(lottoBall(x))
+        for bn in range(1,numBalls + 1):
+            self.ball.append(lottoBall(bn))
+        for bu in range(1,self.numBalls+1):
+            self.unsortedHits[bu]=0
+
+    def sorthits(self):
+        self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
+        
 class lottoBall:
     def __init__(self, number):
         self.number=number
@@ -42,14 +51,14 @@ def file_len(fname): #Get Nuber of Draws in File
             pass
     return i + 1
 
+slp=matrix()
 drawAndDate=[]
 charLineData=[]
 testLen=100
-slp=matrix()
 slp.numDraws=file_len("allnumbers.txt")
 slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
-for drawNum in range(slp.firstDraw,slp.lastDraw - testLen):
+for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
@@ -65,11 +74,15 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen):
             currentDiff=drawNumber-(slp.firstDraw)
         slp.col[x].ball[currentBallIndex].diffMatrix.append(currentDiff)
         slp.col[x].ball[currentBallIndex].lastHit=drawNumber
+        slp.col[x].unsortedHits[currentBallIndex]+=1
 slp.lastDraw=drawNumber
-#for testNum in range(1,testLen):
-#   rawLineData=infFile.readline()
-#    charLineData=rawLineData.split('          ') #split number fields
-#    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
-#    drawNumber=int(drawAndDate[0])
+for shc in range(1,7):
+    slp.col[shc].sorthits()
+#sortedHits=sorted(unsortedHits.items(), key=operator.itemgetter(1))
+for testNum in range(0,testLen):
+    rawLineData=inFile.readline()
+    charLineData=rawLineData.split('          ') #split number fields
+    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
+    drawNumber=int(drawAndDate[0])
 
         
