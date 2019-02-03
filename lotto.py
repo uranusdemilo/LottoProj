@@ -27,7 +27,6 @@ class col:
             self.ball.append(lottoBall(bn))
         for bu in range(1,self.numBalls+1):
             self.unsortedHits[bu]=0
-
     def sorthits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
         
@@ -76,7 +75,7 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
         slp.col[x].ball[currentBallIndex].lastHit=drawNumber
         slp.col[x].unsortedHits[currentBallIndex]+=1
 slp.lastDraw=drawNumber
-for shc in range(1,7):
+for shc in range(1,7):   #sort all sortedHits lists in Col objects
     slp.col[shc].sorthits()
 #sortedHits=sorted(unsortedHits.items(), key=operator.itemgetter(1))
 for testNum in range(0,testLen):
