@@ -18,8 +18,10 @@ class col:
         self.ball=[0]
         self.leastHits=1000
         self.mostHits=0
-        self.leastCommon=0
-        self.mostCommon=0
+        self.leastCommonBall=0
+        self.leastCommonHits=0
+        self.mostCommonBall=0
+        self.mostCommonHits=0
         self.unsortedHits={}
         self.sortedHits={}
         ###Instantiate Balls in Row
@@ -57,7 +59,7 @@ testLen=100
 slp.numDraws=file_len("allnumbers.txt")
 slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
-for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
+for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through draws
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
@@ -75,13 +77,19 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
         slp.col[x].ball[currentBallIndex].lastHit=drawNumber
         slp.col[x].unsortedHits[currentBallIndex]+=1
 slp.lastDraw=drawNumber
-for shc in range(1,7):   #sort all sortedHits lists in Col objects
+for shc in range(1,7):   #sortingHitsColumn, sort all sortedHits lists in Col objects
     slp.col[shc].sorthits()
-#sortedHits=sorted(unsortedHits.items(), key=operator.itemgetter(1))
+for lmc in range(1,7):
+    slp.col[lmc].mostCommonBall=slp.col[lmc].sortedHits[slp.col[lmc].numBalls - 1][0]
+    slp.col[lmc].mostCommonHits=slp.col[lmc].sortedHits[slp.col[lmc].numBalls - 1][1]
+    slp.col[lmc].leastCommonBall=slp.col[lmc].sortedHits[0][0]
+    slp.col[lmc].leastCommonHits=slp.col[lmc].sortedHits[0][1]
 for testNum in range(0,testLen):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
-
-        
+for c in range(1,7):
+    for b in range(1,slp.col[c].numBalls + 1):
+       freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/slp.col[c].mostCommonHits
+       slp.col[c].ball[b].probScore += freqScore
