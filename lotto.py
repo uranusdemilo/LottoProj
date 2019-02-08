@@ -26,9 +26,9 @@ class col:
         self.sortedHits={}
         ###Instantiate Balls in Row
         for bn in range(1,numBalls + 1):
-            self.ball.append(lottoBall(bn))
+            self.ball.append(lottoBall(bn)) #instantiate ball bn
         for bu in range(1,self.numBalls+1):
-            self.unsortedHits[bu]=0
+            self.unsortedHits[bu]=0  #create unsortedHits dictionary
     def sorthits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
         
