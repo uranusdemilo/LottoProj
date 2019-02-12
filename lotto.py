@@ -46,6 +46,9 @@ class lottoBall:
         self.lastDiffs=[]
         self.probScore=0
 
+    def appendHitMatrix(self,draw):
+        self.hitMatrix.append(draw)
+
 def file_len(fname): #Get Nuber of Draws in File
     with open(fname) as f:
         for i, l in enumerate(f):
@@ -67,7 +70,8 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
     currentBallIndex=0
     for x in range(1,7):
         currentBallIndex=int(charLineData[x])
-        slp.col[x].ball[currentBallIndex].hitMatrix.append(drawNumber) #append number to balls hitMatrix
+        #slp.col[x].ball[currentBallIndex].hitMatrix.append(drawNumber) #append number to balls hitMatrix
+        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber)
         slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to balls hitlist
         if slp.col[x].ball[currentBallIndex].lastHit != 0:
             currentDiff=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit)
