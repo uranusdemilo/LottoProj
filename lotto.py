@@ -55,6 +55,10 @@ def file_len(fname): #Get Nuber of Draws in File
             pass
     return i + 1
 
+def showprob(col):
+    for x in range(1,47):
+        print(str(x) + " " + str(slp.col[col].ball[x].probScore))
+
 slp=matrix()
 drawAndDate=[]
 charLineData=[]
@@ -70,8 +74,7 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
     currentBallIndex=0
     for x in range(1,7):
         currentBallIndex=int(charLineData[x])
-        #slp.col[x].ball[currentBallIndex].hitMatrix.append(drawNumber) #append number to balls hitMatrix
-        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber)
+        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append number to balls HitMatrix
         slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to balls hitlist
         if slp.col[x].ball[currentBallIndex].lastHit != 0:
             currentDiff=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit)
@@ -95,5 +98,5 @@ for testNum in range(0,testLen):
     drawNumber=int(drawAndDate[0])
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
-       freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/slp.col[c].mostCommonHits
+       freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)
        slp.col[c].ball[b].probScore += freqScore
