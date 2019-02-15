@@ -21,6 +21,7 @@ class matrix:
         self.firstDraw=1375
         self.lastDraw=0
         self.numDraws=0
+        self.meanDist=0
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,48):
@@ -130,6 +131,8 @@ slp.leastCommonHits=slp.sortedHits[0][1]
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getMeanDist()
+        if(b == 1):
+           slp.ball[b].getMeanDist()
 for testNum in range(0,testLen):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
