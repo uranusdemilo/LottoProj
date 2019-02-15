@@ -61,6 +61,7 @@ class lottoBall:
         self.sdevDist=0 #Standard Deviation for Distance Vector
         self.diffPull=0
         self.lastHit=0
+        self.numDiffs=0
         self.lastDiffs=[]
         self.probScore=0
 
@@ -70,6 +71,11 @@ class lottoBall:
     def getMeanDist(self):
         self.meanDist=statistics.mean(self.diffMatrix)
 
+    def getLastThree(self):
+        self.numDiffs=len(self.diffMatrix)
+        for x in range(self.numDiffs - 3,self.numDiffs):
+            self.lastDiffs.append(self.diffMatrix[x])
+        
 def file_len(fname): #Get Nuber of Draws in File
     with open(fname) as f:
         for i, l in enumerate(f):
