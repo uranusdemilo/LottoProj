@@ -62,7 +62,7 @@ class lottoBall:
         self.diffPull=0
         self.lastHit=0
         self.numDiffs=0
-        self.lastDiffs=[]
+        self.lastThreeDiffs=[]
         self.probScore=0
 
     def appendHitMatrix(self,draw):
@@ -71,10 +71,10 @@ class lottoBall:
     def getMeanDist(self):
         self.meanDist=statistics.mean(self.diffMatrix)
 
-    def getLastThree(self):
+    def getLastThreeDiffs(self):
         self.numDiffs=len(self.diffMatrix)
         for x in range(self.numDiffs - 3,self.numDiffs):
-            self.lastDiffs.append(self.diffMatrix[x])
+            self.lastThreeDiffs.append(self.diffMatrix[x])
         
 def file_len(fname): #Get Nuber of Draws in File
     with open(fname) as f:
@@ -99,7 +99,7 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
     currentBallIndex=0
-    for x in range(1,7):
+    for x in range(1,7):  # read one line at time, feed each number into balls
         currentBallIndex=int(charLineData[x])
         slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append number to balls HitMatrix
         slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
@@ -137,8 +137,10 @@ slp.leastCommonHits=slp.sortedHits[0][1]
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getMeanDist()
-        if(b == 1):
-           slp.ball[b].getMeanDist()
+        slp.col[c].ball[b].getLastThreeDiffs()
+        if(b == 1 and c == 1):
+           slp.ball[b].getMeanDist()  # do matrix balls only once, no cols
+           slp.ball[b].getLastThreeDiffs()
 for testNum in range(0,testLen):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
