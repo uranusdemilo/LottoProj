@@ -28,7 +28,17 @@ class matrix:
             self.unsortedHits[b]=0  #create unsortedHits dictionary
 
     def sorthits(self):
-            self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
+        self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
+        
+    def appendHitMatrix(self,draw):
+        self.hitMatrix.append(draw)
+
+    def getLeastAndMostCommon(self):
+        self.mostCommonBall=self.sortedHits[slp.numBalls - 1][0]
+        self.mostCommonHits=self.sortedHits[slp.numBalls - 1][1]
+        self.leastCommonBall=self.sortedHits[0][0]
+        self.leastCommonHits=self.sortedHits[0][1]
+        
 
 class col:
     def __init__(self,numBalls):
@@ -47,8 +57,15 @@ class col:
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,self.numBalls+1):
             self.unsortedHits[b]=0  #create unsortedHits dictionary
+         
     def sorthits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
+
+    def getLeastAndMostCommon(self):
+        self.mostCommonBall=self.sortedHits[self.numBalls - 1][0]
+        self.mostCommonHits=self.sortedHits[self.numBalls - 1][1]
+        self.leastCommonBall=self.sortedHits[0][0]
+        self.leastCommonHits=self.sortedHits[0][1]
         
 class lottoBall:
     def __init__(self, number):
@@ -102,6 +119,7 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
     for x in range(1,7):  # read one line at time, feed each number into balls
         currentBallIndex=int(charLineData[x])
         slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append number to balls HitMatrix
+        slp.ball[currentBallIndex].appendHitMatrix(drawNumber)
         slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
         slp.ball[currentBallIndex].hits += 1        #add 1 to ball-matrix hitlist
         if slp.col[x].ball[currentBallIndex].lastHit != 0:
@@ -114,7 +132,6 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
             else:
                 currentDiffMat=drawNumber-slp.firstDraw
             slp.ball[currentBallIndex].diffMatrix.append(currentDiffMat)
-            slp.ball[currentBallIndex].diffMatrix.append(currentDiffMat)
             slp.ball[currentBallIndex].lastHit=drawNumber
         slp.col[x].ball[currentBallIndex].diffMatrix.append(currentDiffCol)
         slp.col[x].ball[currentBallIndex].lastHit=drawNumber
@@ -125,20 +142,22 @@ for c in range(1,7):   #sortingHitsColumn, sort all sortedHits lists in Col obje
     slp.col[c].sorthits()
     slp.sorthits()
 for c in range(1,7):
-    slp.col[c].mostCommonBall=slp.col[c].sortedHits[slp.col[c].numBalls - 1][0]
-    slp.col[c].mostCommonHits=slp.col[c].sortedHits[slp.col[c].numBalls - 1][1]
-    slp.col[c].leastCommonBall=slp.col[c].sortedHits[0][0]
-    slp.col[c].leastCommonHits=slp.col[c].sortedHits[0][1]
-slp.mostCommonBall=slp.sortedHits[slp.numBalls - 1][0]
-slp.mostCommonHits=slp.sortedHits[slp.numBalls - 1][1]
-slp.leastCommonBall=slp.sortedHits[0][0]
-slp.leastCommonHits=slp.sortedHits[0][1]
+    #slp.col[c].mostCommonBall=slp.col[c].sortedHits[slp.col[c].numBalls - 1][0]
+    #slp.col[c].mostCommonHits=slp.col[c].sortedHits[slp.col[c].numBalls - 1][1]
+    #slp.col[c].leastCommonBall=slp.col[c].sortedHits[0][0]
+    #slp.col[c].leastCommonHits=slp.col[c].sortedHits[0][1]
+    slp.col[c].getLeastAndMostCommon()
+#slp.mostCommonBall=slp.sortedHits[slp.numBalls - 1][0]
+#slp.mostCommonHits=slp.sortedHits[slp.numBalls - 1][1]
+#slp.leastCommonBall=slp.sortedHits[0][0]
+#slp.leastCommonHits=slp.sortedHits[0][1]
+slp.getLeastAndMostCommon()
     
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getMeanDist()
         slp.col[c].ball[b].getLastThreeDiffs()
-        if(b == 1 and c == 1):
+        if(c == 1):
            slp.ball[b].getMeanDist()  # do matrix balls only once, no cols
            slp.ball[b].getLastThreeDiffs()
 for testNum in range(0,testLen):
