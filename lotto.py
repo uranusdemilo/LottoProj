@@ -71,7 +71,6 @@ class lottoBall:
     def __init__(self, number):
         self.number=number
         self.hits=0
-        #self.score=0 commented 2/13 - not used
         self.hitMatrix=[]
         self.diffMatrix=[]
         self.meanDist=0
@@ -142,30 +141,23 @@ for c in range(1,7):   #sortingHitsColumn, sort all sortedHits lists in Col obje
     slp.col[c].sorthits()
     slp.sorthits()
 for c in range(1,7):
-    #slp.col[c].mostCommonBall=slp.col[c].sortedHits[slp.col[c].numBalls - 1][0]
-    #slp.col[c].mostCommonHits=slp.col[c].sortedHits[slp.col[c].numBalls - 1][1]
-    #slp.col[c].leastCommonBall=slp.col[c].sortedHits[0][0]
-    #slp.col[c].leastCommonHits=slp.col[c].sortedHits[0][1]
     slp.col[c].getLeastAndMostCommon()
-#slp.mostCommonBall=slp.sortedHits[slp.numBalls - 1][0]
-#slp.mostCommonHits=slp.sortedHits[slp.numBalls - 1][1]
-#slp.leastCommonBall=slp.sortedHits[0][0]
-#slp.leastCommonHits=slp.sortedHits[0][1]
-slp.getLeastAndMostCommon()
+    slp.getLeastAndMostCommon()
     
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getMeanDist()
         slp.col[c].ball[b].getLastThreeDiffs()
-        if(c == 1):
-           slp.ball[b].getMeanDist()  # do matrix balls only once, no cols
+        freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)  #i
+        slp.col[c].ball[b].probScore += freqScore
+        if(c == 1):   # do matrix balls only once, no cols
+           slp.ball[b].getMeanDist()
            slp.ball[b].getLastThreeDiffs()
+           freqScore=(slp.ball[b].hits - slp.leastCommonHits)/(slp.mostCommonHits - slp.leastCommonHits)  #i
+           slp.ball[b].probScore += freqScore
+
 for testNum in range(0,testLen):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
-for c in range(1,7):                            #Calculate Mean Difference of all balls.
-    for b in range(1,slp.col[c].numBalls + 1):
-       freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)
-       slp.col[c].ball[b].probScore += freqScore
