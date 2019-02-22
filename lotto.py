@@ -89,12 +89,17 @@ class lottoBall:
         self.lastThreeDiffs=[]
         self.probScore=0
         self.diffScore=0
+        self.meanDistOffset = 0
 
     def appendHitMatrix(self,draw):
         self.hitMatrix.append(draw)
 
-    def getMeanDist(self):
-        self.meanDiv=statistics.mean(self.diffMatrix) - 15
+    def getMeanDist(self,c):
+            if c < 6:
+                self.meanDistOffset = 15
+            else:
+                self.meanDistOffset = 7
+            self.meanDiv=statistics.mean(self.diffMatrix) - self.meanDistOffset
 
     def getLastThreeDiffs(self):
         self.numDiffs=len(self.diffMatrix)
@@ -126,6 +131,7 @@ def showprob(col):
 def showdiffs(c):
     for c in range(1,7):
         slp.col[c].seeDiffScores()
+
 def showDiffAves():
     for c in range(1,7):
         sumDiffs = 0
@@ -177,10 +183,10 @@ for c in range(1,7):
     
 for c in range(1,7): #Get Last Three Diff Entries
     for b in range(1,slp.col[c].numBalls + 1):
-        slp.col[c].ball[b].getMeanDist()
+        slp.col[c].ball[b].getMeanDist(c)
         slp.col[c].ball[b].getLastThreeDiffs()
         if(c == 1):   # do matrix balls only once, no cols
-           slp.ball[b].getMeanDist()
+           slp.ball[b].getMeanDist(c)
            slp.ball[b].getLastThreeDiffs()
 ####Start Scoring Columns and Matrix#####
 for c in range(1,7):  #Frequency Scoring
