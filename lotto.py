@@ -38,8 +38,7 @@ class matrix:
         self.mostCommonHits=self.sortedHits[slp.numBalls - 1][1]
         self.leastCommonBall=self.sortedHits[0][0]
         self.leastCommonHits=self.sortedHits[0][1]
-        
-
+                
 class col:
     def __init__(self,numBalls):
         self.numBalls=numBalls
@@ -52,8 +51,9 @@ class col:
         self.mostCommonHits=0
         self.unsortedHits={}
         self.sortedHits={}
+        self.total=0
         ###Instantiate Balls in Row
-        for b in range(1,numBalls + 1):
+        for b in range(1,self.numBalls + 1):
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,self.numBalls+1):
             self.unsortedHits[b]=0  #create unsortedHits dictionary
@@ -66,33 +66,55 @@ class col:
         self.mostCommonHits=self.sortedHits[self.numBalls - 1][1]
         self.leastCommonBall=self.sortedHits[0][0]
         self.leastCommonHits=self.sortedHits[0][1]
-        
+
+    def seeColDiffs(self):
+        for b in range(1,self.numBalls + 1):
+            print(str(b) + "   "  + str(self.ball[b].diffScore))
+
+    def aveColDiff(self):
+        for b in range(1,self.numBalls + 1):
+            self.total += self.ball[b].diffScore
+            
 class lottoBall:
     def __init__(self, number):
         self.number=number
         self.hits=0
         self.hitMatrix=[]
         self.diffMatrix=[]
-        self.meanDist=0
-        self.sdevDist=0 #Standard Deviation for Distance Vector
+        self.meanDiv=0
+        self.sdevDiv=0 #Standard Deviation for Distance Vector
         self.diffPull=0
         self.lastHit=0
         self.numDiffs=0
         self.lastThreeDiffs=[]
         self.probScore=0
+        self.diffScore=0
 
     def appendHitMatrix(self,draw):
         self.hitMatrix.append(draw)
 
     def getMeanDist(self):
-        self.meanDist=statistics.mean(self.diffMatrix)
+        self.meanDiv=statistics.mean(self.diffMatrix) - 15
 
     def getLastThreeDiffs(self):
         self.numDiffs=len(self.diffMatrix)
         for x in range(self.numDiffs - 3,self.numDiffs):
             self.lastThreeDiffs.append(self.diffMatrix[x])
+    def getDiffScore(self):
+        if self.lastThreeDiffs[1] < self.meanDiv:
+            self.diffScore -= .1
+        if self.lastThreeDiffs[2] < self.meanDiv:
+            self.diffScore -= .1
+        if self.lastThreeDiffs[1] < self.meanDiv and self.lastThreeDiffs[2] < self.meanDiv:
+            self.diffScore -= .1
+        if self.lastThreeDiffs[1] > self.meanDiv:
+            self.diffScore += .1
+        if self.lastThreeDiffs[2] > self.meanDiv:
+            self.diffScore += .1
+        if self.lastThreeDiffs[1] > self.meanDiv and self.lastThreeDiffs[2] < self.meanDiv:
+            self.diffScore += .1
         
-def file_len(fname): #Get Nuber of Draws in File
+def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
         for i, l in enumerate(f):
             pass
@@ -101,6 +123,15 @@ def file_len(fname): #Get Nuber of Draws in File
 def showprob(col):
     for x in range(1,47):
         print(str(x) + " " + str(slp.col[col].ball[x].probScore))
+def showdiffs(c):
+    for c in range(1,7):
+        slp.col[c].seeDiffScores()
+def showDiffAves():
+    for c in range(1,7):
+        sumDiffs = 0
+        for b in range(1,slp.col[c].numBalls + 1):
+           sumDiffs += slp.col[c].ball[b].diffScore
+        print("col " + str(c) + " = " + str(sumDiffs))
 
 slp=matrix()
 drawAndDate=[]
@@ -144,17 +175,25 @@ for c in range(1,7):
     slp.col[c].getLeastAndMostCommon()
     slp.getLeastAndMostCommon()
     
-for c in range(1,7):
+for c in range(1,7): #Get Last Three Diff Entries
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getMeanDist()
         slp.col[c].ball[b].getLastThreeDiffs()
-        freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)  #i
-        slp.col[c].ball[b].probScore += freqScore
         if(c == 1):   # do matrix balls only once, no cols
            slp.ball[b].getMeanDist()
            slp.ball[b].getLastThreeDiffs()
-           freqScore=(slp.ball[b].hits - slp.leastCommonHits)/(slp.mostCommonHits - slp.leastCommonHits)  #i
-           slp.ball[b].probScore += freqScore
+####Start Scoring Columns and Matrix#####
+for c in range(1,7):  #Frequency Scoring
+    for b in range(1,slp.col[c].numBalls + 1):
+        freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)  #i
+        slp.col[c].ball[b].probScore += freqScore
+        if c == 1:
+            freqScore=(slp.ball[b].hits - slp.leastCommonHits)/(slp.mostCommonHits - slp.leastCommonHits)  #i
+            slp.ball[b].probScore += freqScore
+
+for c in range(1,7):
+    for b in range(1,slp.col[c].numBalls + 1):
+        slp.col[c].ball[b].getDiffScore()
 
 for testNum in range(0,testLen):
     rawLineData=inFile.readline()
