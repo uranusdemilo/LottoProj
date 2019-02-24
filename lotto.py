@@ -83,7 +83,6 @@ class lottoBall:
         self.diffMatrix=[]
         self.meanDiv=0
         self.sdevDiv=0 #Standard Deviation for Distance Vector
-        self.diffPull=0
         self.lastHit=0
         self.numDiffs=0
         self.lastThreeDiffs=[]
