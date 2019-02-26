@@ -30,15 +30,38 @@ class matrix:
     def sorthits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
         
-    def appendHitMatrix(self,draw):
-        self.hitMatrix.append(draw)
+    def appendHitMatrix(self,drawn):
+        self.hitMatrix.append(drawn)
 
     def getLeastAndMostCommon(self):
         self.mostCommonBall=self.sortedHits[slp.numBalls - 1][0]
         self.mostCommonHits=self.sortedHits[slp.numBalls - 1][1]
         self.leastCommonBall=self.sortedHits[0][0]
         self.leastCommonHits=self.sortedHits[0][1]
-                
+
+#    def scoreDraw(self,pred,drawn):
+#        drawHits=0
+#        megaHit = 0
+#        payout = 0
+#        predMega=pred.pop()
+#        drawnMega=drawn.pop()
+#        for p in range(0,5):
+#            if pred[p] in drawn:
+#                drawHits += 1
+#        if predMega==drawnMega:megaHit = 1
+#        if drawHits == 0 and megaHit == 0:payout = 0
+#        elif drawHits == 1 and megaHit == 0:payout = 0
+#        elif drawHits == 0 and megaHit == 1:payout = 1
+#        elif drawHits == 1 and megaHit == 1:payout = 2
+#        elif drawHits == 2 and megaHit == 0:payout = 0
+#        elif drawHits == 2 and megaHit == 1:payout = 10
+#        elif drawHits == 3 and megaHit == 1:payout = 47
+#        elif drawHits == 4 and megaHit == 0:payout = 89
+#        elif drawHits == 4 and megaHit == 1:payout = 1050
+#        elif drawHits == 5 and megaHit == 0:payout = 18000
+#        else:payout = 1000000
+#        return payout
+        
 class col:
     def __init__(self,numBalls):
         self.numBalls=numBalls
@@ -104,6 +127,7 @@ class lottoBall:
         self.numDiffs=len(self.diffMatrix)
         for x in range(self.numDiffs - 3,self.numDiffs):
             self.lastThreeDiffs.append(self.diffMatrix[x])
+
     def getDiffScore(self):
         if self.lastThreeDiffs[1] < self.meanDiv:
             self.diffScore -= .1
@@ -129,7 +153,8 @@ def showprob(col):
         print(str(x) + " " + str(slp.col[col].ball[x].probScore))
 def showdiffs(c):
     for c in range(1,7):
-        slp.col[c].seeDiffScores()
+        #slp.col[c].seeDiffScores()
+        slp.col[c].seeColDiffs()
 
 def showDiffAves():
     for c in range(1,7):
@@ -138,6 +163,29 @@ def showDiffAves():
            sumDiffs += slp.col[c].ball[b].diffScore
         print("col " + str(c) + " = " + str(sumDiffs))
 
+def scoreDraw(pred,drawn):
+        drawHits=0
+        megaHit = 0
+        payout = 0
+        predMega=pred.pop()
+        drawnMega=drawn.pop()
+        for p in range(0,5):
+            if pred[p] in drawn:
+                drawHits += 1
+        if predMega==drawnMega:megaHit = 1
+        if drawHits == 0 and megaHit == 0:payout = 0
+        elif drawHits == 1 and megaHit == 0:payout = 0
+        elif drawHits == 0 and megaHit == 1:payout = 1
+        elif drawHits == 1 and megaHit == 1:payout = 2
+        elif drawHits == 2 and megaHit == 0:payout = 0
+        elif drawHits == 2 and megaHit == 1:payout = 10
+        elif drawHits == 3 and megaHit == 1:payout = 47
+        elif drawHits == 4 and megaHit == 0:payout = 89
+        elif drawHits == 4 and megaHit == 1:payout = 1050
+        elif drawHits == 5 and megaHit == 0:payout = 18000
+        else:payout = 1000000
+        return payout
+
 slp=matrix()
 drawAndDate=[]
 charLineData=[]
@@ -145,6 +193,8 @@ testLen=100
 slp.numDraws=file_len("allnumbers.txt")
 slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
+pred=[2,8,12,22,7,20]
+drawn=[9,3,22,12,44,20]
 for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through draws
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
@@ -153,8 +203,8 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
     currentBallIndex=0
     for x in range(1,7):  # read one line at time, feed each number into balls
         currentBallIndex=int(charLineData[x])
-        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append number to balls HitMatrix
-        slp.ball[currentBallIndex].appendHitMatrix(drawNumber)
+        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Column HitMatrix
+        slp.ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Matrix HitMatrix
         slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
         slp.ball[currentBallIndex].hits += 1        #add 1 to ball-matrix hitlist
         if slp.col[x].ball[currentBallIndex].lastHit != 0:
