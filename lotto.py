@@ -38,29 +38,6 @@ class matrix:
         self.mostCommonHits=self.sortedHits[slp.numBalls - 1][1]
         self.leastCommonBall=self.sortedHits[0][0]
         self.leastCommonHits=self.sortedHits[0][1]
-
-#    def scoreDraw(self,pred,drawn):
-#        drawHits=0
-#        megaHit = 0
-#        payout = 0
-#        predMega=pred.pop()
-#        drawnMega=drawn.pop()
-#        for p in range(0,5):
-#            if pred[p] in drawn:
-#                drawHits += 1
-#        if predMega==drawnMega:megaHit = 1
-#        if drawHits == 0 and megaHit == 0:payout = 0
-#        elif drawHits == 1 and megaHit == 0:payout = 0
-#        elif drawHits == 0 and megaHit == 1:payout = 1
-#        elif drawHits == 1 and megaHit == 1:payout = 2
-#        elif drawHits == 2 and megaHit == 0:payout = 0
-#        elif drawHits == 2 and megaHit == 1:payout = 10
-#        elif drawHits == 3 and megaHit == 1:payout = 47
-#        elif drawHits == 4 and megaHit == 0:payout = 89
-#        elif drawHits == 4 and megaHit == 1:payout = 1050
-#        elif drawHits == 5 and megaHit == 0:payout = 18000
-#        else:payout = 1000000
-#        return payout
         
 class col:
     def __init__(self,numBalls):
@@ -92,7 +69,7 @@ class col:
 
     def seeColDiffs(self):
         for b in range(1,self.numBalls + 1):
-            print(str(b) + "   "  + str(self.ball[b].diffScore))
+            print(str(b) + "   "  + str(round(self.ball[b].diffScore,3)))
 
     def aveColDiff(self):
         for b in range(1,self.numBalls + 1):
@@ -129,16 +106,26 @@ class lottoBall:
             self.lastThreeDiffs.append(self.diffMatrix[x])
 
     def getDiffScore(self):
+        # < than mean
         if self.lastThreeDiffs[1] < self.meanDiv:
             self.diffScore -= .1
         if self.lastThreeDiffs[2] < self.meanDiv:
             self.diffScore -= .1
         if self.lastThreeDiffs[1] < self.meanDiv and self.lastThreeDiffs[2] < self.meanDiv:
             self.diffScore -= .1
+        # > than mean
         if self.lastThreeDiffs[1] > self.meanDiv:
             self.diffScore += .1
+            if(self.lastThreeDiffs[1] - self.meanDiv) > 20 and (self.lastThreeDiffs[1] - self.meanDiv < 40):
+                self.diffScore += .1
+            elif(self.lastThreeDiffs[1] - self.meanDiv) > 40:
+                self.diffScore  += .2
         if self.lastThreeDiffs[2] > self.meanDiv:
             self.diffScore += .1
+            if(self.lastThreeDiffs[2] - self.meanDiv) > 20 and (self.lastThreeDiffs[2] - self.meanDiv < 40):
+                self.diffScore += .1
+            elif(self.lastThreeDiffs[2] - self.meanDiv) > 40:
+                self.diffScore  += .2
         if self.lastThreeDiffs[1] > self.meanDiv and self.lastThreeDiffs[2] < self.meanDiv:
             self.diffScore += .1
         
@@ -222,7 +209,8 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
         slp.col[x].ball[currentBallIndex].lastHit=drawNumber
         slp.col[x].unsortedHits[currentBallIndex] += 1
         slp.unsortedHits[currentBallIndex] += 1
-slp.lastDraw=drawNumber
+#slp.lastDraw=drawNumber
+slp.mostRecentDraw=drawNumber
 for c in range(1,7):   #sortingHitsColumn, sort all sortedHits lists in Col objects
     slp.col[c].sorthits()
     slp.sorthits()
@@ -242,7 +230,7 @@ for c in range(1,7):  #Frequency Scoring
     for b in range(1,slp.col[c].numBalls + 1):
         freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)  #i
         slp.col[c].ball[b].probScore += freqScore
-        if c == 1:
+        if c == 1:   #Matrix...no columns
             freqScore=(slp.ball[b].hits - slp.leastCommonHits)/(slp.mostCommonHits - slp.leastCommonHits)  #i
             slp.ball[b].probScore += freqScore
 
@@ -250,8 +238,8 @@ for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getDiffScore()
 
-for testNum in range(0,testLen):
-    rawLineData=inFile.readline()
-    charLineData=rawLineData.split('          ') #split number fields
-    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
-    drawNumber=int(drawAndDate[0])
+#for testNum in range(0,testLen):
+#    rawLineData=inFile.readline()
+#    charLineData=rawLineData.split('          ') #split number fields
+#    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
+#    drawNumber=int(drawAndDate[0])
