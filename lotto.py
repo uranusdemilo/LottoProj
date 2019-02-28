@@ -16,7 +16,9 @@ class matrix:
         self.leastCommonHits=0
         self.mostCommonBall=0
         self.mostCommonHits=0
+        self.mostRecentDraw=1375
         self.unsortedHits={}
+        self.unsortedScores={}
         self.sortedHits={}
         self.firstDraw=1375
         self.lastDraw=0
@@ -27,8 +29,11 @@ class matrix:
         for b in range(1,48):
             self.unsortedHits[b]=0  #create unsortedHits dictionary
 
-    def sorthits(self):
+    def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
+
+    def sortScores(self):
+        self.sortedScores=sorted(self.unsortedScores.items(), key=operator.itemgetter(1))
         
     def appendHitMatrix(self,drawn):
         self.hitMatrix.append(drawn)
@@ -38,6 +43,11 @@ class matrix:
         self.mostCommonHits=self.sortedHits[slp.numBalls - 1][1]
         self.leastCommonBall=self.sortedHits[0][0]
         self.leastCommonHits=self.sortedHits[0][1]
+
+    def getUnsortedScores(self):
+        for b in range(1,47):
+            self.unsortedScores[b]=self.ball[b].probScore
+
         
 class col:
     def __init__(self,numBalls):
@@ -50,6 +60,8 @@ class col:
         self.mostCommonBall=0
         self.mostCommonHits=0
         self.unsortedHits={}
+        self.unsortedScores={}
+        self.sortedScores={}
         self.sortedHits={}
         self.total=0
         ###Instantiate Balls in Row
@@ -58,14 +70,21 @@ class col:
         for b in range(1,self.numBalls+1):
             self.unsortedHits[b]=0  #create unsortedHits dictionary
          
-    def sorthits(self):
+    def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
 
+    def sortScores(self):
+        self.sortedScores=sorted(self.unsortedScores.items(), key=operator.itemgetter(1))
+    
     def getLeastAndMostCommon(self):
         self.mostCommonBall=self.sortedHits[self.numBalls - 1][0]
         self.mostCommonHits=self.sortedHits[self.numBalls - 1][1]
         self.leastCommonBall=self.sortedHits[0][0]
         self.leastCommonHits=self.sortedHits[0][1]
+
+    def getUnsortedScores(self):
+        for b in range(1,self.numBalls + 1):
+            self.unsortedScores[b]=self.ball[b].probScore
 
     def seeColDiffs(self):
         for b in range(1,self.numBalls + 1):
@@ -86,8 +105,9 @@ class lottoBall:
         self.lastHit=0
         self.numDiffs=0
         self.lastThreeDiffs=[]
-        self.probScore=0
-        self.diffScore=0
+        self.freqScore=0  #Score based on frequency
+        self.diffScore=0  #Score based on occurances
+        self.probScore=0  #Sum/Ave of all scores
         self.meanDistOffset = 0
 
     def appendHitMatrix(self,draw):
@@ -128,6 +148,11 @@ class lottoBall:
                 self.diffScore  += .2
         if self.lastThreeDiffs[1] > self.meanDiv and self.lastThreeDiffs[2] < self.meanDiv:
             self.diffScore += .1
+        self.diffScore=round(self.diffScore,4)
+
+    def totalUpScore(self):
+        self.probScore=self.freqScore + self.diffScore
+        
         
 def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
@@ -137,7 +162,8 @@ def file_len(fname): #Get Number of Draws in File
 
 def showprob(col):
     for x in range(1,47):
-        print(str(x) + " " + str(slp.col[col].ball[x].probScore))
+        print(str(x) + " " + str(slp.col[col].ball[x].freqScore))
+        
 def showdiffs(c):
     for c in range(1,7):
         #slp.col[c].seeDiffScores()
@@ -172,6 +198,10 @@ def scoreDraw(pred,drawn):
         elif drawHits == 5 and megaHit == 0:payout = 18000
         else:payout = 1000000
         return payout
+    
+#####################################
+########## END FUNCTIONS ############
+#####################################    
 
 slp=matrix()
 drawAndDate=[]
@@ -180,6 +210,7 @@ testLen=100
 slp.numDraws=file_len("allnumbers.txt")
 slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
+outFile=open("results.txt","w")
 pred=[2,8,12,22,7,20]
 drawn=[9,3,22,12,44,20]
 for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through draws
@@ -212,8 +243,8 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
 #slp.lastDraw=drawNumber
 slp.mostRecentDraw=drawNumber
 for c in range(1,7):   #sortingHitsColumn, sort all sortedHits lists in Col objects
-    slp.col[c].sorthits()
-    slp.sorthits()
+    slp.col[c].sortHits()
+    slp.sortHits()
 for c in range(1,7):
     slp.col[c].getLeastAndMostCommon()
     slp.getLeastAndMostCommon()
@@ -229,17 +260,34 @@ for c in range(1,7): #Get Last Three Diff Entries
 for c in range(1,7):  #Frequency Scoring
     for b in range(1,slp.col[c].numBalls + 1):
         freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)  #i
-        slp.col[c].ball[b].probScore += freqScore
+        slp.col[c].ball[b].freqScore += freqScore
         if c == 1:   #Matrix...no columns
             freqScore=(slp.ball[b].hits - slp.leastCommonHits)/(slp.mostCommonHits - slp.leastCommonHits)  #i
-            slp.ball[b].probScore += freqScore
+            slp.ball[b].freqScore += freqScore
 
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getDiffScore()
+        if c == 1:  #Matrix...no columns
+            slp.ball[b].getDiffScore()
 
-#for testNum in range(0,testLen):
-#    rawLineData=inFile.readline()
-#    charLineData=rawLineData.split('          ') #split number fields
-#    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
-#    drawNumber=int(drawAndDate[0])
+for c in range(1,7):
+    for b in range(1,slp.col[c].numBalls + 1):
+        slp.col[c].ball[b].totalUpScore()
+        if c == 1:  #Matrix...no columns
+            slp.ball[b].totalUpScore()
+
+slp.getUnsortedScores()
+slp.sortScores()
+for c in range(1,7):
+    slp.col[c].getUnsortedScores()
+    slp.col[c].sortScores()
+
+for testNum in range(0,testLen):
+    rawLineData=inFile.readline()
+    charLineData=rawLineData.split('          ') #split number fields
+    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
+    drawNumber=int(drawAndDate[0])
+    outFile.write(str(drawNumber) + "\n")
+inFile.close()
+outFile.close()
