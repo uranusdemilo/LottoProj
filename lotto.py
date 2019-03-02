@@ -48,6 +48,9 @@ class matrix:
         for b in range(1,47):
             self.unsortedScores[b]=self.ball[b].probScore
 
+    def totalUpScore(self):
+        self.probScore=self.freqScore + self.diffScore
+
         
 class col:
     def __init__(self,numBalls):
@@ -150,9 +153,18 @@ class lottoBall:
             self.diffScore += .1
         self.diffScore=round(self.diffScore,4)
 
-    def totalUpScore(self):
-        self.probScore=self.freqScore + self.diffScore
-        
+    def totalUpScore(self,ball):
+        self.probScore=self.freqScore + self.diffScore + slp.ball[b].probScore
+
+class drawlist:
+    def __init__(self):
+        self.score=0
+        self.payOut=0
+        self.listData={}
+        self.matches=[]
+
+    def newDraw(self,drawNum,pred,drawn):
+        self.matches.append([drawNum,pred,drawn])
         
 def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
@@ -166,7 +178,6 @@ def showprob(col):
         
 def showdiffs(c):
     for c in range(1,7):
-        #slp.col[c].seeDiffScores()
         slp.col[c].seeColDiffs()
 
 def showDiffAves():
@@ -273,9 +284,9 @@ for c in range(1,7):
 
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
-        slp.col[c].ball[b].totalUpScore()
+        slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
         if c == 1:  #Matrix...no columns
-            slp.ball[b].totalUpScore()
+            slp.ball[b].totalUpScore(b)
 
 slp.getUnsortedScores()
 slp.sortScores()
@@ -289,5 +300,8 @@ for testNum in range(0,testLen):
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
     outFile.write(str(drawNumber) + "\n")
+
+slpdraws=drawlist()
+slpdraws.newDraw(1715,pred,drawn)
 inFile.close()
 outFile.close()
