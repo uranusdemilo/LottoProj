@@ -24,6 +24,7 @@ class matrix:
         self.lastDraw=0
         self.numDraws=0
         self.meanDist=0
+        self.mostProbable=[]
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,48):
@@ -50,6 +51,13 @@ class matrix:
 
     def totalUpScore(self):
         self.probScore=self.freqScore + self.diffScore
+
+    def getMostProbable(self):
+        for c in range(1,7):
+            if c < 6:
+                self.mostProbable.append(slp.col[c].sortedScores[46][0])
+            else:
+                self.mostProbable.append(slp.col[c].sortedScores[26][0])
 
         
 class col:
@@ -215,6 +223,7 @@ def scoreDraw(pred,drawn):
 #####################################    
 
 slp=matrix()
+slpdraws=drawlist()
 drawAndDate=[]
 charLineData=[]
 testLen=100
@@ -237,7 +246,7 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
         slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
         slp.ball[currentBallIndex].hits += 1        #add 1 to ball-matrix hitlist
         if slp.col[x].ball[currentBallIndex].lastHit != 0:
-            currentDiffCol=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit)
+            currentDiffCol=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit) #Current Diff Column-Ball object
         else:
             currentDiffCol=drawNumber-(slp.firstDraw)
         if(x != 6):                                 # col 6 is Mega....don't include in matrix
@@ -251,7 +260,6 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
         slp.col[x].ball[currentBallIndex].lastHit=drawNumber
         slp.col[x].unsortedHits[currentBallIndex] += 1
         slp.unsortedHits[currentBallIndex] += 1
-#slp.lastDraw=drawNumber
 slp.mostRecentDraw=drawNumber
 for c in range(1,7):   #sortingHitsColumn, sort all sortedHits lists in Col objects
     slp.col[c].sortHits()
@@ -293,6 +301,7 @@ slp.sortScores()
 for c in range(1,7):
     slp.col[c].getUnsortedScores()
     slp.col[c].sortScores()
+slp.getMostProbable()
 
 for testNum in range(0,testLen):
     rawLineData=inFile.readline()
@@ -301,7 +310,14 @@ for testNum in range(0,testLen):
     drawNumber=int(drawAndDate[0])
     outFile.write(str(drawNumber) + "\n")
 
-slpdraws=drawlist()
-slpdraws.newDraw(1715,pred,drawn)
+slpdraws.newDraw(drawNumber,pred,drawn)
 inFile.close()
 outFile.close()
+# Read line, iterate through it
+#   load numbers into ball-coll objects
+#   load numbers into ball-matrix objects
+#   load draw number into ball-col ojects hit list
+#   load draw number into ball-matrix hit list
+#   add 1 to ball-col and ball-matrix hit lists
+#   Calculate current diff for ball-col and ball-matrix objects
+# FC-M737
