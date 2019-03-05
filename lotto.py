@@ -303,21 +303,49 @@ for c in range(1,7):
     slp.col[c].sortScores()
 slp.getMostProbable()
 
+#for testNum in range(0,testLen):
+
 for testNum in range(0,testLen):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
-    outFile.write(str(drawNumber) + "\n")
+    currentBallIndex=0
+"""
+    for x in range(1,7):  # read one line at time, feed each number into balls
+        currentBallIndex=int(charLineData[x])
+        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Column HitMatrix
+        slp.ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Matrix HitMatrix
+        slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
+        slp.ball[currentBallIndex].hits += 1        #add 1 to ball-matrix hitlist
+        if slp.col[x].ball[currentBallIndex].lastHit != 0:
+            currentDiffCol=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit) #Current Diff Column-Ball object
+        else:
+            currentDiffCol=drawNumber-(slp.firstDraw)
+        if(x != 6):                                 # col 6 is Mega....don't include in matrix
+            if slp.ball[currentBallIndex].lastHit !=0:
+                currentDiffMat=drawNumber -(slp.ball[currentBallIndex].lastHit)
+            else:
+                currentDiffMat=drawNumber-slp.firstDraw
+            slp.ball[currentBallIndex].diffMatrix.append(currentDiffMat)
+            slp.ball[currentBallIndex].lastHit=drawNumber
+        slp.col[x].ball[currentBallIndex].diffMatrix.append(currentDiffCol)
+        slp.col[x].ball[currentBallIndex].lastHit=drawNumber
+        slp.col[x].unsortedHits[currentBallIndex] += 1
+        slp.unsortedHits[currentBallIndex] += 1
+"""
+    #outFile.write(str(drawNumber) + "\n")
 
-slpdraws.newDraw(drawNumber,pred,drawn)
+#slpdraws.newDraw(drawNumber,pred,drawn)
 inFile.close()
 outFile.close()
-# Read line, iterate through it
-#   load numbers into ball-coll objects
-#   load numbers into ball-matrix objects
-#   load draw number into ball-col ojects hit list
-#   load draw number into ball-matrix hit list
-#   add 1 to ball-col and ball-matrix hit lists
-#   Calculate current diff for ball-col and ball-matrix objects
-# FC-M737
+"""
+Read line, iterate through it
+   load numbers into ball-coll objects
+   load numbers into ball-matrix objects
+   load draw number into ball-col ojects hit list
+   load draw number into ball-matrix hit list
+   add 1 to ball-col and ball-matrix hit lists
+   Calculate current diff for ball-col and ball-matrix objects
+ FC-M737
+"""
