@@ -34,19 +34,23 @@ class matrix:
             self.unsortedHits[b]=0  #create unsortedHits dictionary
 
     def readInNumber(self,c,drawNumber,currentBallIndex):
-        self.col[c].ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Column HitMatrix
-        self.ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Matrix HitMatrix
+        self.col[c].ball[currentBallIndex].hitMatrix.append(drawNumber) #append num to balls Column HitMatrix
+        self.ball[currentBallIndex].hitMatrix.append(drawNumber) #append num to balls Matrix HitMatrix
         self.col[c].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
         self.ball[currentBallIndex].hits += 1        #add 1 to ball-matrix hitlist
         if self.col[c].ball[currentBallIndex].lastHit != 0:
             currentDiffCol=drawNumber -(self.col[c].ball[currentBallIndex].lastHit) #Current Diff Column-Ball object
+            self.col[c].ball[currentBallIndex].appendLastDiffs(currentDiffCol)
         else:
             currentDiffCol=drawNumber-(self.firstDraw)
+            self.col[c].ball[currentBallIndex].appendLastDiffs(currentDiffCol)
         if(c != 6):                                 # col 6 is Mega....don't include in matrix
             if self.ball[currentBallIndex].lastHit !=0:
                 currentDiffMat=drawNumber -(self.ball[currentBallIndex].lastHit)
+                self.ball[currentBallIndex].appendLastDiffs(currentDiffMat)
             else:
                 currentDiffMat=drawNumber-slp.firstDraw
+                self.ball[currentBallIndex].appendLastDiffs(currentDiffMat)
             self.ball[currentBallIndex].diffMatrix.append(currentDiffMat)
             self.ball[currentBallIndex].lastHit=drawNumber
         self.col[c].ball[currentBallIndex].diffMatrix.append(currentDiffCol)
@@ -58,12 +62,6 @@ class matrix:
         if c == 1:
             self.sortHits()
             self.getLeastAndMostCommon()
-        if drawNumber > slp.lastDraw - testLen:
-            self.col[c].ball[currentBallIndex].getMeanDist(c)
-            self.col[c].ball[currentBallIndex].getLastThreeDiffs()
-            if c == 1:
-                self.ball[currentBallIndex].getMeanDist(c)
-                self.ball[currentBallIndex].getLastThreeDiffs()
 
     def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
@@ -156,9 +154,6 @@ class lottoBall:
         self.probScore=0  #Sum/Ave of all scores
         self.meanDistOffset = 0
 
-    def appendHitMatrix(self,draw):
-        self.hitMatrix.append(draw)
-
     def getMeanDist(self,c):
             if c < 6:
                 self.meanDistOffset = 15
@@ -166,15 +161,10 @@ class lottoBall:
                 self.meanDistOffset = 7
             self.meanDiv=statistics.mean(self.diffMatrix) - self.meanDistOffset
 
-    def getLastThreeDiffs(self):
-        self.numDiffs=len(self.diffMatrix)
-        if len(self.lastThreeDiffs) == 0:
-            for x in range(self.numDiffs - 3,self.numDiffs):
-                self.lastThreeDiffs.append(self.diffMatrix[x])
-        else:
-            self.lastThreeDiffs = []
-            for x in range(self.numDiffs - 3,self.numDiffs):
-                self.lastThreeDiffs.append(self.diffMatrix[x])
+    def appendLastDiffs(self,currentDiff):
+        if len(self.lastThreeDiffs) == 3:
+            del self.lastThreeDiffs[0]
+        self.lastThreeDiffs.append(currentDiff)            
 
     def getDiffScore(self):
         # < than mean
@@ -295,11 +285,9 @@ for c in range(1,7):  #Frequency Scoring
 
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
-        print(b)
         slp.col[c].ball[b].getDiffScore()
         if c == 6:  #Matrix...no columns
             slp.ball[b].getDiffScore()
-
 """            
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
