@@ -28,7 +28,6 @@ class matrix:
         self.numDraws=0
         self.meanDist=0
         self.mostProbable=[]
-        self.c=0
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,48):
@@ -59,14 +58,12 @@ class matrix:
         if c == 1:
             self.sortHits()
             self.getLeastAndMostCommon()
-        #problem spot starts here
-        #for b in range(1,self.col[c].numBalls + 1):
-        #    self.col[c].ball[b].getMeanDist(c)
-        #    self.col[c].ball[b].getLastThreeDiffs()
-        #    if(c == 1):   # do matrix balls only once, no cols
-        #        self.ball[b].getMeanDist(c)
-        #        self.ball[b].getLastThreeDiffs()
-
+        if drawNumber > slp.lastDraw - testLen:
+            self.col[c].ball[currentBallIndex].getMeanDist(c)
+            self.col[c].ball[currentBallIndex].getLastThreeDiffs()
+            if c == 1:
+                self.ball[currentBallIndex].getMeanDist(c)
+                self.ball[currentBallIndex].getLastThreeDiffs()
 
     def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
@@ -171,8 +168,13 @@ class lottoBall:
 
     def getLastThreeDiffs(self):
         self.numDiffs=len(self.diffMatrix)
-        for x in range(self.numDiffs - 3,self.numDiffs):
-            self.lastThreeDiffs.append(self.diffMatrix[x])
+        if len(self.lastThreeDiffs) == 0:
+            for x in range(self.numDiffs - 3,self.numDiffs):
+                self.lastThreeDiffs.append(self.diffMatrix[x])
+        else:
+            self.lastThreeDiffs = []
+            for x in range(self.numDiffs - 3,self.numDiffs):
+                self.lastThreeDiffs.append(self.diffMatrix[x])
 
     def getDiffScore(self):
         # < than mean
@@ -271,7 +273,8 @@ inFile=open("allnumbers.txt")
 outFile=open("results.txt","w")
 pred=[2,8,12,22,7,20]
 drawn=[9,3,22,12,44,20]
-for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through draws
+#for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
+for drawNum in range(slp.firstDraw,slp.lastDraw + 1):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
@@ -280,41 +283,7 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1): #loop through dr
     for x in range(1,7):  # read one line at time, feed each number into balls
         currentBallIndex=int(charLineData[x])
         slp.readInNumber(x,drawNumber,currentBallIndex)
-# ALL MOVED INTO slp.readInNumber function, duplicated in comparison section.
-#        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Column HitMatrix
-#        slp.ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Matrix HitMatrix
-#        slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
-#        slp.ball[currentBallIndex].hits += 1        #add 1 to ball-matrix hitlist
-#        if slp.col[x].ball[currentBallIndex].lastHit != 0:
-#            currentDiffCol=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit) #Current Diff Column-Ball object
-#        else:
-#            currentDiffCol=drawNumber-(slp.firstDraw)
-#        if(x != 6):                                 # col 6 is Mega....don't include in matrix
-#            if slp.ball[currentBallIndex].lastHit !=0:
-#                currentDiffMat=drawNumber -(slp.ball[currentBallIndex].lastHit)
-#            else:
-#                currentDiffMat=drawNumber-slp.firstDraw
-#            slp.ball[currentBallIndex].diffMatrix.append(currentDiffMat)
-#            slp.ball[currentBallIndex].lastHit=drawNumber
-#        slp.col[x].ball[currentBallIndex].diffMatrix.append(currentDiffCol)
-#        slp.col[x].ball[currentBallIndex].lastHit=drawNumber
-#        slp.col[x].unsortedHits[currentBallIndex] += 1
-#        slp.unsortedHits[currentBallIndex] += 1
-#slp.mostRecentDraw=drawNumber
-#for c in range(1,7):   #sortingHitsColumn, sort all sortedHits lists in Col objects
-#    slp.col[c].sortHits()
-#    slp.sortHits()
-#for c in range(1,7):
-#    slp.col[c].getLeastAndMostCommon()
-#    slp.getLeastAndMostCommon()
-#
-for c in range(1,7): #Get Last Three Diff Entries
-    for b in range(1,slp.col[c].numBalls + 1):
-        slp.col[c].ball[b].getMeanDist(c)
-        slp.col[c].ball[b].getLastThreeDiffs()
-        if(c == 1):   # do matrix balls only once, no cols
-           slp.ball[b].getMeanDist(c)
-           slp.ball[b].getLastThreeDiffs()
+
 ####Start Scoring Columns and Matrix#####
 for c in range(1,7):  #Frequency Scoring
     for b in range(1,slp.col[c].numBalls + 1):
@@ -326,10 +295,12 @@ for c in range(1,7):  #Frequency Scoring
 
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
+        print(b)
         slp.col[c].ball[b].getDiffScore()
-        if c == 1:  #Matrix...no columns
+        if c == 6:  #Matrix...no columns
             slp.ball[b].getDiffScore()
 
+"""            
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
@@ -343,42 +314,9 @@ for c in range(1,7):
     slp.col[c].sortScores()
 slp.getMostProbable()
 
-#for testNum in range(0,testLen):
-
-#for testNum in range(0,testLen):
-for testNum in range(0,3):
-    rawLineData=inFile.readline()
-    charLineData=rawLineData.split('          ') #split number fields
-    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
-    drawNumber=int(drawAndDate[0])
-    currentBallIndex=0
-    slp.currentDraw=drawNumber
-"""
-    for x in range(1,7):  # read one line at time, feed each number into balls
-        currentBallIndex=int(charLineData[x])
-        slp.col[x].ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Column HitMatrix
-        slp.ball[currentBallIndex].appendHitMatrix(drawNumber) #append num to balls Matrix HitMatrix
-        slp.col[x].ball[currentBallIndex].hits += 1 #add 1 to ball-column hitlist
-        slp.ball[currentBallIndex].hits += 1        #add 1 to ball-matrix hitlist
-        if slp.col[x].ball[currentBallIndex].lastHit != 0:
-            currentDiffCol=drawNumber -(slp.col[x].ball[currentBallIndex].lastHit) #Current Diff Column-Ball object
-        else:
-            currentDiffCol=drawNumber-(slp.firstDraw)
-        if(x != 6):                                 # col 6 is Mega....don't include in matrix
-            if slp.ball[currentBallIndex].lastHit !=0:
-                currentDiffMat=drawNumber -(slp.ball[currentBallIndex].lastHit)
-            else:
-                currentDiffMat=drawNumber-slp.firstDraw
-            slp.ball[currentBallIndex].diffMatrix.append(currentDiffMat)
-            slp.ball[currentBallIndex].lastHit=drawNumber
-        slp.col[x].ball[currentBallIndex].diffMatrix.append(currentDiffCol)
-        slp.col[x].ball[currentBallIndex].lastHit=drawNumber
-        slp.col[x].unsortedHits[currentBallIndex] += 1
-        slp.unsortedHits[currentBallIndex] += 1
-"""
-    #outFile.write(str(drawNumber) + "\n")
-
+#outFile.write(str(drawNumber) + "\n")
 #slpdraws.newDraw(drawNumber,pred,drawn)
+"""
 inFile.close()
 outFile.close()
 """
