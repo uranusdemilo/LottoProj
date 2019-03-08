@@ -6,18 +6,17 @@ class matrix:
         self.col=[0]
         self.ball=[0]
         self.numBalls=47
+        self.col.append(col(47)) # create collumn with 47 balls
         self.col.append(col(47))
         self.col.append(col(47))
         self.col.append(col(47))
         self.col.append(col(47))
-        self.col.append(col(47))
-        self.col.append(col(27))
+        self.col.append(col(27)) #Create Mega with 27
         self.leastCommonBall=0
-        self.leastCommonHits=0
         self.mostCommonBall=0
+        self.leastCommonHits=0
         self.mostCommonHits=0
-        #self.mostRecentDraw=1375
-        self.currentDraw=0
+        self.currentDraw=1374
         self.currentDiffCol=0
         self.currentDiffMat=0
         self.unsortedHits={}
@@ -27,6 +26,7 @@ class matrix:
         self.lastDraw=0
         self.numDraws=0
         self.meanDist=0
+        self.predicted=[]
         self.mostProbable=[]
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
@@ -85,12 +85,12 @@ class matrix:
     def totalUpScore(self):
         self.probScore=self.freqScore + self.diffScore
 
-    def getMostProbable(self):
+    def getPredicted(self):
         for c in range(1,7):
             if c < 6:
-                self.mostProbable.append(slp.col[c].sortedScores[46][0])
+                self.predicted.append(slp.col[c].sortedScores[46][0])
             else:
-                self.mostProbable.append(slp.col[c].sortedScores[26][0])
+                self.predicted.append(slp.col[c].sortedScores[26][0])
 
         
 class col:
@@ -144,22 +144,20 @@ class lottoBall:
         self.hits=0
         self.hitMatrix=[]
         self.diffMatrix=[]
-        self.meanDiv=0
-        self.sdevDiv=0 #Standard Deviation for Distance Vector
+        self.meanDiff=0
         self.lastHit=0
         self.numDiffs=0
         self.lastThreeDiffs=[]
         self.freqScore=0  #Score based on frequency
         self.diffScore=0  #Score based on occurances
         self.probScore=0  #Sum/Ave of all scores
-        self.meanDistOffset = 0
 
     def getMeanDist(self,c):
             if c < 6:
                 self.meanDistOffset = 15
             else:
                 self.meanDistOffset = 7
-            self.meanDiv=statistics.mean(self.diffMatrix) - self.meanDistOffset
+            self.meanDiff=statistics.mean(self.diffMatrix) - self.meanDistOffset
 
     def appendLastDiffs(self,currentDiff):
         if len(self.lastThreeDiffs) == 3:
@@ -168,26 +166,27 @@ class lottoBall:
 
     def getDiffScore(self):
         # < than mean
-        if self.lastThreeDiffs[1] < self.meanDiv:
+        self.diffScore=0
+        if self.lastThreeDiffs[1] < self.meanDiff:
             self.diffScore -= .1
-        if self.lastThreeDiffs[2] < self.meanDiv:
+        if self.lastThreeDiffs[2] < self.meanDiff:
             self.diffScore -= .1
-        if self.lastThreeDiffs[1] < self.meanDiv and self.lastThreeDiffs[2] < self.meanDiv:
+        if self.lastThreeDiffs[1] < self.meanDiff and self.lastThreeDiffs[2] < self.meanDiff:
             self.diffScore -= .1
         # > than mean
-        if self.lastThreeDiffs[1] > self.meanDiv:
+        if self.lastThreeDiffs[1] > self.meanDiff:
             self.diffScore += .1
-            if(self.lastThreeDiffs[1] - self.meanDiv) > 20 and (self.lastThreeDiffs[1] - self.meanDiv < 40):
+            if(self.lastThreeDiffs[1] - self.meanDiff) > 20 and (self.lastThreeDiffs[1] - self.meanDiff < 40):
                 self.diffScore += .1
-            elif(self.lastThreeDiffs[1] - self.meanDiv) > 40:
+            elif(self.lastThreeDiffs[1] - self.meanDiff) > 40:
                 self.diffScore  += .2
-        if self.lastThreeDiffs[2] > self.meanDiv:
+        if self.lastThreeDiffs[2] > self.meanDiff:
             self.diffScore += .1
-            if(self.lastThreeDiffs[2] - self.meanDiv) > 20 and (self.lastThreeDiffs[2] - self.meanDiv < 40):
+            if(self.lastThreeDiffs[2] - self.meanDiff) > 20 and (self.lastThreeDiffs[2] - self.meanDiff < 40):
                 self.diffScore += .1
-            elif(self.lastThreeDiffs[2] - self.meanDiv) > 40:
+            elif(self.lastThreeDiffs[2] - self.meanDiff) > 40:
                 self.diffScore  += .2
-        if self.lastThreeDiffs[1] > self.meanDiv and self.lastThreeDiffs[2] < self.meanDiv:
+        if self.lastThreeDiffs[1] > self.meanDiff and self.lastThreeDiffs[2] < self.meanDiff:
             self.diffScore += .1
         self.diffScore=round(self.diffScore,4)
 
@@ -261,14 +260,13 @@ slp.numDraws=file_len("allnumbers.txt")
 slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
 outFile=open("results.txt","w")
-pred=[2,8,12,22,7,20]
-drawn=[9,3,22,12,44,20]
 #for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
-for drawNum in range(slp.firstDraw,slp.lastDraw + 1):
+for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
     drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
     drawNumber=int(drawAndDate[0])
+    slp.currentDraw +=1
     currentBallIndex=0
     for x in range(1,7):  # read one line at time, feed each number into balls
         currentBallIndex=int(charLineData[x])
@@ -288,7 +286,7 @@ for c in range(1,7):
         slp.col[c].ball[b].getDiffScore()
         if c == 6:  #Matrix...no columns
             slp.ball[b].getDiffScore()
-"""            
+            
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
@@ -300,20 +298,13 @@ slp.sortScores()
 for c in range(1,7):
     slp.col[c].getUnsortedScores()
     slp.col[c].sortScores()
-slp.getMostProbable()
+slp.getPredicted()
 
 #outFile.write(str(drawNumber) + "\n")
 #slpdraws.newDraw(drawNumber,pred,drawn)
-"""
+
 inFile.close()
 outFile.close()
-"""
-Read line, iterate through it
-   load numbers into ball-coll objects
-   load numbers into ball-matrix objects
-   load draw number into ball-col ojects hit list
-   load draw number into ball-matrix hit list
-   add 1 to ball-col and ball-matrix hit lists
-   Calculate current diff for ball-col and ball-matrix objects
- FC-M737
-"""
+
+#print("Draw:  %4d,  score:  %8.3f" % (1454,25.234))
+#print("Draw:  %4d,  score:  %12s" % (1454,"22 33 44"))
