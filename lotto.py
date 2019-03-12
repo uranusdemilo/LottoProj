@@ -17,6 +17,7 @@ class matrix:
         self.leastCommonHits=0
         self.mostCommonHits=0
         self.currentDraw=1374
+        self.drawn=[]
         self.currentDiffCol=0
         self.currentDiffMat=0
         self.unsortedHits={}
@@ -225,15 +226,18 @@ def showDiffAves():
         print("col " + str(c) + " = " + str(sumDiffs))
 
 def scoreDraw(pred,drawn):
+        print(pred)
         drawHits=0
         megaHit = 0
         payout = 0
-        predMega=pred.pop()
-        drawnMega=drawn.pop()
+        predMega=pred[5]
+        drawnMega=drawn[5]
         for p in range(0,5):
+            print(p)
             if pred[p] in drawn:
                 drawHits += 1
-        if predMega==drawnMega:megaHit = 1
+        if predMega==drawnMega:
+            megaHit = 1
         if drawHits == 0 and megaHit == 0:payout = 0
         elif drawHits == 1 and megaHit == 0:payout = 0
         elif drawHits == 0 and megaHit == 1:payout = 1
@@ -302,6 +306,14 @@ slp.getPredicted()
 
 #outFile.write(str(drawNumber) + "\n")
 #slpdraws.newDraw(drawNumber,pred,drawn)
+rawLineData=inFile.readline().rstrip()
+charLineData=rawLineData.split('          ') #split number fields
+drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
+drawNumber=int(drawAndDate[0])
+slp.currentDraw +=1
+currentBallIndex=0
+for x in range(1,7):  # read one line at time, feed each number into balls
+    slp.drawn.append(int(charLineData[x]))
 
 inFile.close()
 outFile.close()
