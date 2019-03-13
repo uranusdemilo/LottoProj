@@ -12,10 +12,8 @@ class matrix:
         self.col.append(col(47))
         self.col.append(col(47))
         self.col.append(col(27)) #Create Mega with 27
-        self.leastCommonBall=0
-        self.mostCommonBall=0
-        self.leastCommonHits=0
-        self.mostCommonHits=0
+        self.leastCommonBall=0; self.mostCommonBall=0
+        self.leastCommonHits=0; self.mostCommonHits=0
         self.currentDraw=1374
         self.drawn=[]
         self.currentDiffCol=0
@@ -29,6 +27,7 @@ class matrix:
         self.meanDist=0
         self.predicted=[]
         self.mostProbable=[]
+        self.runningPayout = 0
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,48):
@@ -226,14 +225,12 @@ def showDiffAves():
         print("col " + str(c) + " = " + str(sumDiffs))
 
 def scoreDraw(pred,drawn):
-        print(pred)
         drawHits=0
         megaHit = 0
         payout = 0
         predMega=pred[5]
         drawnMega=drawn[5]
         for p in range(0,5):
-            print(p)
             if pred[p] in drawn:
                 drawHits += 1
         if predMega==drawnMega:
@@ -303,9 +300,11 @@ for c in range(1,7):
     slp.col[c].getUnsortedScores()
     slp.col[c].sortScores()
 slp.getPredicted()
-
-#outFile.write(str(drawNumber) + "\n")
-#slpdraws.newDraw(drawNumber,pred,drawn)
+print("Last Precalc Draw = " + str(slp.currentDraw))
+d=0
+for x in range(slp.currentDraw,slp.lastDraw):
+    d += 1
+print(str(d) + " loops till end")
 rawLineData=inFile.readline().rstrip()
 charLineData=rawLineData.split('          ') #split number fields
 drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
@@ -314,9 +313,17 @@ slp.currentDraw +=1
 currentBallIndex=0
 for x in range(1,7):  # read one line at time, feed each number into balls
     slp.drawn.append(int(charLineData[x]))
-
+    currentBallIndex=int(charLineData[x])
+    slp.readInNumber(x,drawNumber,currentBallIndex)
+payout=scoreDraw(slp.predicted,slp.drawn)
+print(slp.drawn, end="   ")
+print(slp.predicted, end="   ")
+print(payout)
+slp.runningPayout += payout
 inFile.close()
 outFile.close()
 
-#print("Draw:  %4d,  score:  %8.3f" % (1454,25.234))
-#print("Draw:  %4d,  score:  %12s" % (1454,"22 33 44"))
+
+#Last Line = 3328
+#outFile.write(str(drawNumber) + "\n")
+#slpdraws.newDraw(drawNumber,pred,drawn)
