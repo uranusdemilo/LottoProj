@@ -193,16 +193,6 @@ class lottoBall:
     def totalUpScore(self,ball):
         self.probScore=self.freqScore + self.diffScore + slp.ball[b].probScore
 
-class drawlist:
-    def __init__(self):
-        self.score=0
-        self.payOut=0
-        self.listData={}
-        self.matches=[]
-
-    def newDraw(self,drawNum,pred,drawn):
-        self.matches.append([drawNum,pred,drawn])
-        
 def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
         for i, l in enumerate(f):
@@ -213,9 +203,9 @@ def showprob(col):
     for x in range(1,47):
         print(str(x) + " " + str(slp.col[col].ball[x].freqScore))
         
-def showdiffs(c):
-    for c in range(1,7):
-        slp.col[c].seeColDiffs()
+#def showdiffs(c):
+#    for c in range(1,7):
+#        slp.col[c].seeColDiffs()
 
 def showDiffAves():
     for c in range(1,7):
@@ -224,13 +214,32 @@ def showDiffAves():
            sumDiffs += slp.col[c].ball[b].diffScore
         print("col " + str(c) + " = " + str(sumDiffs))
 
+def printList(list):
+    print("[",end="")
+    for n in range(0,6):
+        if n == 0:
+            if list[n] < 10:
+                print((" " + str(list[n])),end=",")
+            else:
+                print((str(list[n])),end=",")
+        elif n > 0 and n < 5:
+            if list[n] < 10:
+                print(("  " + str(list[n])),end=",")
+            else:
+                print((" " + str(list[n])),end=",")
+        elif n == 5:
+            if list[n] < 10:
+                print(("  " + str(list[n])),end="]")
+            else:
+                print((" " + str(list[n])),end="]")
+
 def scoreDraw(pred,drawn):
-        drawHits=0
+        drawHits = 0
         megaHit = 0
         payout = 0
         predMega=pred[5]
         drawnMega=drawn[5]
-        for p in range(0,5):
+        for p in range(0,4): #Only 4...do not do mega
             if pred[p] in drawn:
                 drawHits += 1
         if predMega==drawnMega:
@@ -241,6 +250,7 @@ def scoreDraw(pred,drawn):
         elif drawHits == 1 and megaHit == 1:payout = 2
         elif drawHits == 2 and megaHit == 0:payout = 0
         elif drawHits == 2 and megaHit == 1:payout = 10
+        elif drawHits == 3 and megaHit == 0:payout = 12
         elif drawHits == 3 and megaHit == 1:payout = 47
         elif drawHits == 4 and megaHit == 0:payout = 89
         elif drawHits == 4 and megaHit == 1:payout = 1050
@@ -253,7 +263,6 @@ def scoreDraw(pred,drawn):
 #####################################    
 
 slp=matrix()
-slpdraws=drawlist()
 drawAndDate=[]
 charLineData=[]
 testLen=100
@@ -294,9 +303,9 @@ for c in range(1,7):
         if c == 1:  #Matrix...no columns
             slp.ball[b].totalUpScore(b)
 
-slp.getUnsortedScores()
+slp.getUnsortedScores()  #Matrix
 slp.sortScores()
-for c in range(1,7):
+for c in range(1,7):    #   Columns
     slp.col[c].getUnsortedScores()
     slp.col[c].sortScores()
 slp.getPredicted()
@@ -304,22 +313,25 @@ print("Last Precalc Draw = " + str(slp.currentDraw))
 d=0
 for x in range(slp.currentDraw,slp.lastDraw):
     d += 1
-print(str(d) + " loops till end")
-rawLineData=inFile.readline().rstrip()
-charLineData=rawLineData.split('          ') #split number fields
-drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
-drawNumber=int(drawAndDate[0])
-slp.currentDraw +=1
-currentBallIndex=0
-for x in range(1,7):  # read one line at time, feed each number into balls
-    slp.drawn.append(int(charLineData[x]))
-    currentBallIndex=int(charLineData[x])
-    slp.readInNumber(x,drawNumber,currentBallIndex)
-payout=scoreDraw(slp.predicted,slp.drawn)
-print(slp.drawn, end="   ")
-print(slp.predicted, end="   ")
-print(payout)
-slp.runningPayout += payout
+for postLoop in range(slp.currentDraw,slp.lastDraw):
+    rawLineData=inFile.readline().rstrip()
+    charLineData=rawLineData.split('          ') #split number fields
+    drawAndDate=charLineData[0].split('     ')   #split Draw number and date 
+    drawNumber=int(drawAndDate[0])
+    slp.currentDraw +=1
+    currentBallIndex=0
+    slp.drawn=[]
+    for x in range(1,7):  # read one line at time, feed each number into balls
+        slp.drawn.append(int(charLineData[x]))
+        currentBallIndex=int(charLineData[x])
+        slp.readInNumber(x,drawNumber,currentBallIndex)
+    payout=scoreDraw(slp.predicted,slp.drawn)
+    printList(slp.drawn)
+    printList(slp.predicted)
+    print("   " + str(payout))
+    slp.runningPayout += payout
+print("************")
+print(slp.runningPayout)
 inFile.close()
 outFile.close()
 
