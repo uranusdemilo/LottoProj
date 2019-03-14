@@ -63,14 +63,17 @@ class matrix:
             self.sortHits()
             self.getLeastAndMostCommon()
 
+    def appendHitMatrix(self,drawn):
+        self.hitMatrix.append(drawn)
+
+    def getFreqScore(self,b):
+        self.ball[b].freqScore=(slp.ball[b].hits - self.leastCommonHits)/(self.mostCommonHits-self.leastCommonHits)
+
     def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
 
     def sortScores(self):
         self.sortedScores=sorted(self.unsortedScores.items(), key=operator.itemgetter(1))
-        
-    def appendHitMatrix(self,drawn):
-        self.hitMatrix.append(drawn)
 
     def getLeastAndMostCommon(self):
         self.mostCommonBall=self.sortedHits[slp.numBalls - 1][0]
@@ -97,8 +100,6 @@ class col:
     def __init__(self,numBalls):
         self.numBalls=numBalls
         self.ball=[0]
-        self.leastHits=1000
-        self.mostHits=0
         self.leastCommonBall=0
         self.leastCommonHits=0
         self.mostCommonBall=0
@@ -113,6 +114,8 @@ class col:
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,self.numBalls+1):
             self.unsortedHits[b]=0  #create unsortedHits dictionary
+    def getFreqScore(self,b):
+        self.ball[b].freqScore=(self.ball[b].hits-self.leastCommonHits)/(self.mostCommonHits-self.leastCommonHits)
          
     def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
@@ -152,17 +155,17 @@ class lottoBall:
         self.diffScore=0  #Score based on occurances
         self.probScore=0  #Sum/Ave of all scores
 
-    def getMeanDist(self,c):
-            if c < 6:
-                self.meanDistOffset = 15
-            else:
-                self.meanDistOffset = 7
-            self.meanDiff=statistics.mean(self.diffMatrix) - self.meanDistOffset
+    #def getMeanDist(self,c):
+    #        if c < 6:
+    #            self.meanDistOffset = 15
+    #        else:
+    #            self.meanDistOffset = 7
+    #        self.meanDiff=statistics.mean(self.diffMatrix) - self.meanDistOffset
 
     def appendLastDiffs(self,currentDiff):
         if len(self.lastThreeDiffs) == 3:
             del self.lastThreeDiffs[0]
-        self.lastThreeDiffs.append(currentDiff)            
+        self.lastThreeDiffs.append(currentDiff)
 
     def getDiffScore(self):
         # < than mean
@@ -199,9 +202,9 @@ def file_len(fname): #Get Number of Draws in File
             pass
     return i + 1
 
-def showprob(col):
-    for x in range(1,47):
-        print(str(x) + " " + str(slp.col[col].ball[x].freqScore))
+def showprob(c):
+    for x in range(1,slp.col[c].numBalls + 1):
+        print(str(x) + " " + str(slp.col[c].ball[x].freqScore))
         
 #def showdiffs(c):
 #    for c in range(1,7):
@@ -270,7 +273,6 @@ slp.numDraws=file_len("allnumbers.txt")
 slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
 outFile=open("results.txt","w")
-#for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
 for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
     rawLineData=inFile.readline()
     charLineData=rawLineData.split('          ') #split number fields
@@ -278,25 +280,20 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
     drawNumber=int(drawAndDate[0])
     slp.currentDraw +=1
     currentBallIndex=0
-    for x in range(1,7):  # read one line at time, feed each number into balls
-        currentBallIndex=int(charLineData[x])
-        slp.readInNumber(x,drawNumber,currentBallIndex)
+    for c in range(1,7):  # read one line at time, feed each number into balls
+        currentBallIndex=int(charLineData[c])
+        slp.readInNumber(c,drawNumber,currentBallIndex)
 
-####Start Scoring Columns and Matrix#####
 for c in range(1,7):  #Frequency Scoring
     for b in range(1,slp.col[c].numBalls + 1):
-        freqScore=(slp.col[c].ball[b].hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits - slp.col[c].leastCommonHits)  #i
-        slp.col[c].ball[b].freqScore += freqScore
+        slp.col[c].getFreqScore(b)
         if c == 1:   #Matrix...no columns
-            freqScore=(slp.ball[b].hits - slp.leastCommonHits)/(slp.mostCommonHits - slp.leastCommonHits)  #i
-            slp.ball[b].freqScore += freqScore
-
+            slp.getFreqScore(b)
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getDiffScore()
-        if c == 6:  #Matrix...no columns
-            slp.ball[b].getDiffScore()
-            
+        if c == 1:  #Matrix...no columns
+            slp.ball[b].getDiffScore()            
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
@@ -325,10 +322,27 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
         slp.drawn.append(int(charLineData[x]))
         currentBallIndex=int(charLineData[x])
         slp.readInNumber(x,drawNumber,currentBallIndex)
+    for c in range(1,7):
+        for b in range(1,slp.col[c].numBalls + 1):
+            slp.col[c].ball[b].getDiffScore()
+            if c == 1:  #Matrix...no columns
+                slp.ball[b].getDiffScore()
+    for c in range(1,7):
+        for b in range(1,slp.col[c].numBalls + 1):
+            slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
+            if c == 1:  #Matrix...no columns
+                slp.ball[b].totalUpScore(b)
+    for c in range(1,7):    #   Columns
+        slp.col[c].getUnsortedScores()
+        slp.col[c].sortScores()
+    slp.getUnsortedScores()
+    slp.sortScores()
+    slp.getPredicted()
     payout=scoreDraw(slp.predicted,slp.drawn)
     printList(slp.drawn)
     printList(slp.predicted)
     print("   " + str(payout))
+#    print("   " + str(slp.probScore))
     slp.runningPayout += payout
 print("************")
 print(slp.runningPayout)
@@ -339,3 +353,6 @@ outFile.close()
 #Last Line = 3328
 #outFile.write(str(drawNumber) + "\n")
 #slpdraws.newDraw(drawNumber,pred,drawn)
+
+#self.probScore=self.freqScore + self.diffScore
+#issues - Prob Score way too high!
