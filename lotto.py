@@ -25,8 +25,9 @@ class matrix:
         self.lastDraw=0
         self.numDraws=0
         self.meanDist=0
-        self.predicted=[]
+        self.predicted=[0,0,0,0,0,0]
         self.mostProbable=[]
+        self.probScore=0
         self.runningPayout = 0
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
@@ -85,16 +86,19 @@ class matrix:
         for b in range(1,47):
             self.unsortedScores[b]=self.ball[b].probScore
 
-    def totalUpScore(self):
-        self.probScore=self.freqScore + self.diffScore
+#    def totalUpScore(self):
+#        self.probScore=self.freqScore + self.diffScore
+
+    def totalUpScore(self,b):
+        self.probScore.ball[b]=self.ball[b].freqScore + self.ball[b].diffScore
 
     def getPredicted(self):
-        for c in range(1,7):
-            if c < 6:
-                self.predicted.append(slp.col[c].sortedScores[46][0])
+        for c in range(0,6):
+            if c < 5:
+                self.predicted[c]=self.sortedScores[45][0]
             else:
-                self.predicted.append(slp.col[c].sortedScores[26][0])
-
+                self.predicted[c]=self.sortedScores[25][0]
+            
         
 class col:
     def __init__(self,numBalls):
@@ -307,9 +311,9 @@ for c in range(1,7):    #   Columns
     slp.col[c].sortScores()
 slp.getPredicted()
 print("Last Precalc Draw = " + str(slp.currentDraw))
-d=0
-for x in range(slp.currentDraw,slp.lastDraw):
-    d += 1
+#d=0
+#for x in range(slp.currentDraw,slp.lastDraw):
+#    d += 1
 for postLoop in range(slp.currentDraw,slp.lastDraw):
     rawLineData=inFile.readline().rstrip()
     charLineData=rawLineData.split('          ') #split number fields
@@ -346,6 +350,7 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     slp.runningPayout += payout
 print("************")
 print(slp.runningPayout)
+print(slp.col[1].ball[1].probScore)
 inFile.close()
 outFile.close()
 
@@ -356,3 +361,4 @@ outFile.close()
 
 #self.probScore=self.freqScore + self.diffScore
 #issues - Prob Score way too high!
+#totalUpScore needs ball variable passed and referenced!
