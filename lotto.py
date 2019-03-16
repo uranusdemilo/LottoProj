@@ -25,9 +25,8 @@ class matrix:
         self.lastDraw=0
         self.numDraws=0
         self.meanDist=0
-        self.predicted=[0,0,0,0,0,0]
+        self.predicted=[0,0,0,0,0,0,0]
         self.mostProbable=[]
-        self.probScore=0
         self.runningPayout = 0
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
@@ -83,27 +82,24 @@ class matrix:
         self.leastCommonHits=self.sortedHits[0][1]
 
     def getUnsortedScores(self):
-        for b in range(1,47):
+        for b in range(1,48):
             self.unsortedScores[b]=self.ball[b].probScore
-
-#    def totalUpScore(self):
-#        self.probScore=self.freqScore + self.diffScore
 
     def totalUpScore(self,b):
         self.probScore.ball[b]=self.ball[b].freqScore + self.ball[b].diffScore
 
     def getPredicted(self):
-        for c in range(0,6):
+        for c in range(1,7):
             if c < 5:
-                self.predicted[c]=self.sortedScores[45][0]
+                self.predicted[c]=self.col[c].sortedScores[46][0]
             else:
                 self.predicted[c]=self.sortedScores[25][0]
             
         
 class col:
     def __init__(self,numBalls):
-        self.numBalls=numBalls
         self.ball=[0]
+        self.numBalls=numBalls
         self.leastCommonBall=0
         self.leastCommonHits=0
         self.mostCommonBall=0
@@ -197,8 +193,8 @@ class lottoBall:
             self.diffScore += .1
         self.diffScore=round(self.diffScore,4)
 
-    def totalUpScore(self,ball):
-        self.probScore=self.freqScore + self.diffScore + slp.ball[b].probScore
+    def totalUpScore(self,b):
+        self.probScore=.5*(self.freqScore) + (self.diffScore) + .7*(slp.ball[b].freqScore) + (slp.ball[b].diffScore)
 
 def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
@@ -206,9 +202,14 @@ def file_len(fname): #Get Number of Draws in File
             pass
     return i + 1
 
-def showprob(c):
+def showFreq(c):
     for x in range(1,slp.col[c].numBalls + 1):
         print(str(x) + " " + str(slp.col[c].ball[x].freqScore))
+
+def showProb(c):
+    for x in range(1,slp.col[c].numBalls + 1):
+        print(str(x) + " " + str(slp.col[c].ball[x].probScore))
+
         
 #def showdiffs(c):
 #    for c in range(1,7):
@@ -246,8 +247,8 @@ def scoreDraw(pred,drawn):
         payout = 0
         predMega=pred[5]
         drawnMega=drawn[5]
-        for p in range(0,4): #Only 4...do not do mega
-            if pred[p] in drawn:
+        for p in range(0,5): #Only 4...do not do mega
+            if drawn[p] in pred:
                 drawHits += 1
         if predMega==drawnMega:
             megaHit = 1
@@ -311,9 +312,6 @@ for c in range(1,7):    #   Columns
     slp.col[c].sortScores()
 slp.getPredicted()
 print("Last Precalc Draw = " + str(slp.currentDraw))
-#d=0
-#for x in range(slp.currentDraw,slp.lastDraw):
-#    d += 1
 for postLoop in range(slp.currentDraw,slp.lastDraw):
     rawLineData=inFile.readline().rstrip()
     charLineData=rawLineData.split('          ') #split number fields
@@ -346,7 +344,6 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     printList(slp.drawn)
     printList(slp.predicted)
     print("   " + str(payout))
-#    print("   " + str(slp.probScore))
     slp.runningPayout += payout
 print("************")
 print(slp.runningPayout)
@@ -360,5 +357,3 @@ outFile.close()
 #slpdraws.newDraw(drawNumber,pred,drawn)
 
 #self.probScore=self.freqScore + self.diffScore
-#issues - Prob Score way too high!
-#totalUpScore needs ball variable passed and referenced!
