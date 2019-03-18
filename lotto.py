@@ -25,7 +25,7 @@ class matrix:
         self.lastDraw=0
         self.numDraws=0
         self.meanDist=0
-        self.predicted=[0,0,0,0,0,0,0]
+        self.predicted=[0,0,0,0,0,0]
         self.mostProbable=[]
         self.runningPayout = 0
         for b in range(1,48):
@@ -89,11 +89,14 @@ class matrix:
         self.probScore.ball[b]=self.ball[b].freqScore + self.ball[b].diffScore
 
     def getPredicted(self):
-        for c in range(1,7):
+        for c in range(0,6):
             if c < 5:
-                self.predicted[c]=self.col[c].sortedScores[46][0]
+                if self.col[c+1].sortedScores[-1] in self.predicted:
+                    self.predicted[c]=self.col[c + 1].sortedScores[45][0]
+                else:
+                    self.predicted[c]=self.col[c + 1].sortedScores[46][0]
             else:
-                self.predicted[c]=self.sortedScores[25][0]
+                self.predicted[c]=self.col[c+1].sortedScores[26][0]
             
         
 class col:
