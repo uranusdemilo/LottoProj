@@ -1,5 +1,6 @@
 import operator
 import statistics
+import math
 
 class matrix:
     def __init__(self):
@@ -96,7 +97,7 @@ class matrix:
                 else:
                     self.predicted[c]=self.col[c + 1].sortedScores[46][0]
             else:
-                self.predicted[c]=self.col[c+1].sortedScores[26][0]
+                self.predicted[c]=self.col[c + 1].sortedScores[26][0]
             
         
 class col:
@@ -158,13 +159,6 @@ class lottoBall:
         self.diffScore=0  #Score based on occurances
         self.probScore=0  #Sum/Ave of all scores
 
-    #def getMeanDist(self,c):
-    #        if c < 6:
-    #            self.meanDistOffset = 15
-    #        else:
-    #            self.meanDistOffset = 7
-    #        self.meanDiff=statistics.mean(self.diffMatrix) - self.meanDistOffset
-
     def appendLastDiffs(self,currentDiff):
         if len(self.lastThreeDiffs) == 3:
             del self.lastThreeDiffs[0]
@@ -197,33 +191,13 @@ class lottoBall:
         self.diffScore=round(self.diffScore,4)
 
     def totalUpScore(self,b):
-        self.probScore=.5*(self.freqScore) + (self.diffScore) + .7*(slp.ball[b].freqScore) + (slp.ball[b].diffScore)
+        self.probScore=.5*(self.freqScore) + (self.diffScore) + .7*(slp.ball[b].freqScore) + (slp.ball[b].diffScore)        
 
 def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
         for i, l in enumerate(f):
             pass
     return i + 1
-
-def showFreq(c):
-    for x in range(1,slp.col[c].numBalls + 1):
-        print(str(x) + " " + str(slp.col[c].ball[x].freqScore))
-
-def showProb(c):
-    for x in range(1,slp.col[c].numBalls + 1):
-        print(str(x) + " " + str(slp.col[c].ball[x].probScore))
-
-        
-#def showdiffs(c):
-#    for c in range(1,7):
-#        slp.col[c].seeColDiffs()
-
-def showDiffAves():
-    for c in range(1,7):
-        sumDiffs = 0
-        for b in range(1,slp.col[c].numBalls + 1):
-           sumDiffs += slp.col[c].ball[b].diffScore
-        print("col " + str(c) + " = " + str(sumDiffs))
 
 def printList(list):
     print("[",end="")
@@ -268,7 +242,33 @@ def scoreDraw(pred,drawn):
         elif drawHits == 5 and megaHit == 0:payout = 18000
         else:payout = 1000000
         return payout
+
+def adraw(drawn):
+    print("Col   Num    LastThree     prob ball    prob mat     diff ball     diff mat")
+    for d in range(0,6):
+        print(str(d + 1) + "     " + str(drawn[d]) + "    ", end="")
+        print(rjlist(slp.col[d+1].ball[slp.drawn[d]].lastThreeDiffs))
+
+def rjlist(lis):
+    outstr=""
+    for pos in range(0,3):
+        if len(str(lis[pos]))==1:
+            outstr += ("  " + str(lis[pos]))
+            if(pos < 2):
+                outstr += ","
+        elif len(str(lis[pos]))==2:
+            outstr += (" " + str(lis[pos]))
+            if(pos < 2):
+                outstr += ","
+        else:
+            outstr += str(lis[pos])
+            if(pos < 2):
+                outstr += ","
+    return outstr            
     
+def rjnum(num):
+     num=round(num,3)
+     return num
 #####################################
 ########## END FUNCTIONS ############
 #####################################    
@@ -349,8 +349,9 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     print("   " + str(payout))
     slp.runningPayout += payout
 print("************")
-print(slp.runningPayout)
-print(slp.col[1].ball[1].probScore)
+print("Running Payout=   " + str(slp.runningPayout))
+print("************")
+adraw(slp.drawn)
 inFile.close()
 outFile.close()
 
@@ -360,3 +361,4 @@ outFile.close()
 #slpdraws.newDraw(drawNumber,pred,drawn)
 
 #self.probScore=self.freqScore + self.diffScore
+#print("testthis".rjust(20,'-'))
