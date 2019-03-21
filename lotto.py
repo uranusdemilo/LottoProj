@@ -23,9 +23,10 @@ class matrix:
         self.unsortedScores={}
         self.sortedHits={}
         self.firstDraw=1375
+        self.freqScoreMult=1
+        self.diffScoreMult=3
         self.lastDraw=0
         self.numDraws=0
-#        self.meanDist=0
         self.drawn=[]
         self.predicted=[0,0,0,0,0,0]
         self.mostProbable=[]
@@ -69,7 +70,7 @@ class matrix:
         self.hitMatrix.append(drawn)
 
     def getFreqScore(self,b):
-        self.ball[b].freqScore=(slp.ball[b].hits - self.leastCommonHits)/(self.mostCommonHits-self.leastCommonHits)
+        self.ball[b].freqScore=self.freqScoreMult*(slp.ball[b].hits - self.leastCommonHits)/(self.mostCommonHits-self.leastCommonHits)
 
     def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
@@ -87,18 +88,24 @@ class matrix:
         for b in range(1,48):
             self.unsortedScores[b]=self.ball[b].probScore
 
-    def totalUpScore(self,b):
+    def totalUpScore(self,b): #Matrix, no cols
         self.probScore.ball[b]=self.ball[b].freqScore + self.ball[b].diffScore
 
     def getPredicted(self):
         for c in range(0,6):
             if c < 5:
-                if self.col[c+1].sortedScores[-1] in self.predicted:
-                    self.predicted[c]=self.col[c + 1].sortedScores[45][0]
+                if self.col[c+1].sortedScores[-1][0] in self.predicted:
+                    if self.col[c+1].sortedScores[-2][0] in self.predicted:
+                        if self.col[c+1].sortedScores[-3][0] in self.predicted:
+                            self.predicted[c]=self.col[c+1].sortedScores[-4][0]
+                        else:
+                            self.predicted[c]=self.col[c+1].sortedScores[-3][0]
+                    else:
+                        self.predicted[c]=self.col[c+1].sortedScores[-2][0]
                 else:
-                    self.predicted[c]=self.col[c + 1].sortedScores[46][0]
+                    self.predicted[c]=self.col[c + 1].sortedScores[-1][0]
             else:
-                self.predicted[c]=self.col[c + 1].sortedScores[26][0]
+                self.predicted[c]=self.col[c + 1].sortedScores[-1][0]
             
         
 class col:
@@ -119,9 +126,7 @@ class col:
             self.ball.append(lottoBall(b)) #instantiate ball b
         for b in range(1,self.numBalls+1):
             self.unsortedHits[b]=0  #create unsortedHits dictionary
-    def getFreqScore(self,b):
-        self.ball[b].freqScore=(self.ball[b].hits-self.leastCommonHits)/(self.mostCommonHits-self.leastCommonHits)
-         
+
     def sortHits(self):
         self.sortedHits=sorted(self.unsortedHits.items(), key=operator.itemgetter(1))
 
@@ -152,6 +157,8 @@ class lottoBall:
         self.hits=0
         self.hitMatrix=[]
         self.diffMatrix=[]
+        self.freqScoreMult=1
+        self.diffScoreMult=7
         self.meanDiff=0
         self.lastHit=0
         self.numDiffs=0
@@ -189,9 +196,12 @@ class lottoBall:
                 self.diffScore  += .2
         if self.lastThreeDiffs[1] > self.meanDiff and self.lastThreeDiffs[2] < self.meanDiff:
             self.diffScore += .1
-        self.diffScore=round(self.diffScore,4)
+        self.diffScore=self.diffScoreMult * (round(self.diffScore,4))
 
-    def totalUpScore(self,b):
+    def getFreqScore(self,c):
+        self.freqScore=self.freqScoreMult * (self.hits-slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits-slp.col[c].leastCommonHits)
+
+    def totalUpScore(self,b):  #ball, has cols
         self.probScore=(self.freqScore) + (self.diffScore) + (slp.ball[b].freqScore) + (slp.ball[b].diffScore)        
 
 def file_len(fname): #Get Number of Draws in File
@@ -226,7 +236,7 @@ def scoreDraw(pred,drawn):
         return payout
 
 def adraw(drawn): #Alalyze Final Draw 
-    print("Col   Num    LastThree     prob ball    prob mat     diff ball     diff mat")
+    print("Col   Num    LastThree     freq ball    freq mat     diff ball     diff mat")
     for d in range(0,6):
 #        print(str(d + 1) + "     " + str(drawn[d]) + "    ", end="")
         print(str(d + 1) + "     " + strformat.rjtwo(drawn[d]) + "    ", end="")
@@ -277,7 +287,7 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
 
 for c in range(1,7):  #Frequency Scoring
     for b in range(1,slp.col[c].numBalls + 1):
-        slp.col[c].getFreqScore(b)
+        slp.col[c].ball[b].getFreqScore(c)
         if c == 1:   #Matrix...no columns
             slp.getFreqScore(b)
 for c in range(1,7):
@@ -327,6 +337,7 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     slp.sortScores()
     slp.getPredicted()
     payout=scoreDraw(slp.predicted,slp.drawn)
+    print(str(drawNumber) + "   ",end="")
     strformat.printList(slp.drawn)
     strformat.printList(slp.predicted)
     print("   " + str(payout))
