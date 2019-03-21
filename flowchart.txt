@@ -1,0 +1,17 @@
+read in balls
+get col freqscore
+	ball.hits-col.leastcommon/col.mostcommon-col.leastcommon
+get mat freqscore
+	ball.hits-col.leastcommon/col.mostcommon-col.leastcommon
+get col diffScore
+	score via ball.getDiffScore function
+get mat diffScore
+	score via mat.getDiffScore function
+totalUpScore col.ball
+	ball.diffScore + ball.freqScore + mat.diffScore + mat.freqScore
+mat.getUnsortedScores
+mat.sortScores
+cols 1 thru 5:
+	col.getUnsortedScores
+	col.sortScores
+mat.getPredicted
