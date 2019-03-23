@@ -24,7 +24,7 @@ class matrix:
         self.sortedHits={}
         self.firstDraw=1375
         self.freqScoreMult=1
-        self.diffScoreMult=3
+        self.diffScoreMult=1
         self.lastDraw=0
         self.numDraws=0
         self.drawn=[]
@@ -89,7 +89,7 @@ class matrix:
             self.unsortedScores[b]=self.ball[b].probScore
 
     def totalUpScore(self,b): #Matrix, no cols
-        self.probScore.ball[b]=self.ball[b].freqScore + self.ball[b].diffScore
+        self.ball[b].probScore=self.ball[b].freqScore + (self.ball[b].diffScore)
 
     def getPredicted(self):
         for c in range(0,6):
@@ -158,7 +158,7 @@ class lottoBall:
         self.hitMatrix=[]
         self.diffMatrix=[]
         self.freqScoreMult=1
-        self.diffScoreMult=7
+        self.diffScoreMult=1
         self.meanDiff=0
         self.lastHit=0
         self.numDiffs=0
@@ -199,10 +199,10 @@ class lottoBall:
         self.diffScore=self.diffScoreMult * (round(self.diffScore,4))
 
     def getFreqScore(self,c):
-        self.freqScore=self.freqScoreMult * (self.hits-slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits-slp.col[c].leastCommonHits)
+        self.freqScore=self.freqScoreMult * (self.hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits-slp.col[c].leastCommonHits)
 
     def totalUpScore(self,b):  #ball, has cols
-        self.probScore=(self.freqScore) + (self.diffScore) + (slp.ball[b].freqScore) + (slp.ball[b].diffScore)        
+        self.probScore=(self.freqScore) + 5*(self.diffScore) + (slp.ball[b].freqScore) + 2*(slp.ball[b].diffScore)        
 
 def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
@@ -316,10 +316,15 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     slp.currentDraw +=1
     currentBallIndex=0
     slp.drawn=[]
-    for x in range(1,7):  # read one line at time, feed each number into balls
+    for x in range(1,7):
         slp.drawn.append(int(charLineData[x]))
         currentBallIndex=int(charLineData[x])
         slp.readInNumber(x,drawNumber,currentBallIndex)
+    for c in range(1,7):  #Frequency Scoring
+        for b in range(1,slp.col[c].numBalls + 1):
+            slp.col[c].ball[b].getFreqScore(c)
+            if c == 1:   #Matrix...no columns
+                slp.getFreqScore(b)
     for c in range(1,7):
         for b in range(1,slp.col[c].numBalls + 1):
             slp.col[c].ball[b].getDiffScore()
