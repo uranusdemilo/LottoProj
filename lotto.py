@@ -1,7 +1,7 @@
 import operator
 import statistics
 import strformat
-#import math
+import matplotlib.pyplot as plt
 
 class matrix:
     def __init__(self):
@@ -16,15 +16,15 @@ class matrix:
         self.col.append(col(27)) #Create Mega with 27
         self.leastCommonBall=0; self.mostCommonBall=0
         self.leastCommonHits=0; self.mostCommonHits=0
-        self.currentDraw=1374
+        self.firstDraw=1375
+        self.currentDraw=self.firstDraw-1
         self.currentDiffCol=0
         self.currentDiffMat=0
         self.unsortedHits={}
         self.unsortedScores={}
         self.sortedHits={}
-        self.firstDraw=1375
         self.freqScoreMult=1
-        self.diffScoreMult=1
+        self.diffScoreMult=3
         self.lastDraw=0
         self.numDraws=0
         self.drawn=[]
@@ -158,14 +158,25 @@ class lottoBall:
         self.hitMatrix=[]
         self.diffMatrix=[]
         self.freqScoreMult=1
-        self.diffScoreMult=1
+        self.diffScoreMult=3
         self.meanDiff=0
         self.lastHit=0
-        self.numDiffs=0
         self.lastThreeDiffs=[]
         self.freqScore=0  #Score based on frequency
         self.diffScore=0  #Score based on occurances
         self.probScore=0  #Sum/Ave of all scores
+        self.outlier = 150
+        self.runningTotal=0
+        self.counter=0
+
+    def getMeanDiff(self):
+        self.runningTotal=0
+        for d in self.diffMatrix:
+            if d > self.outlier:
+                d == 150
+            self.counter +=1
+            self.runningTotal += d
+        self.meanDiff=self.runningTotal/self.counter
 
     def appendLastDiffs(self,currentDiff):
         if len(self.lastThreeDiffs) == 3:
@@ -196,13 +207,13 @@ class lottoBall:
                 self.diffScore  += .2
         if self.lastThreeDiffs[1] > self.meanDiff and self.lastThreeDiffs[2] < self.meanDiff:
             self.diffScore += .1
-        self.diffScore=self.diffScoreMult * (round(self.diffScore,4))
+        self.diffScore=self.diffScoreMult*(self.diffScoreMult * (round(self.diffScore,4)))
 
     def getFreqScore(self,c):
         self.freqScore=self.freqScoreMult * (self.hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits-slp.col[c].leastCommonHits)
 
     def totalUpScore(self,b):  #ball, has cols
-        self.probScore=(self.freqScore) + 5*(self.diffScore) + (slp.ball[b].freqScore) + 2*(slp.ball[b].diffScore)        
+        self.probScore=(self.freqScore) + (self.diffScore) + (slp.ball[b].freqScore) + (slp.ball[b].diffScore)        
 
 def file_len(fname): #Get Number of Draws in File
     with open(fname) as f:
@@ -235,16 +246,17 @@ def scoreDraw(pred,drawn):
         else:payout = 1000000
         return payout
 
-def adraw(drawn): #Alalyze Final Draw 
+def adraw(inList): #Alalyze Final Draw 
     print("Col   Num    LastThree     freq ball    freq mat     diff ball     diff mat")
     for d in range(0,6):
-#        print(str(d + 1) + "     " + str(drawn[d]) + "    ", end="")
-        print(str(d + 1) + "     " + strformat.rjtwo(drawn[d]) + "    ", end="")
-        print(strformat.rjlist(slp.col[d+1].ball[slp.drawn[d]].lastThreeDiffs) + "      ",end="")
-        print(strformat.rjnum(slp.col[d+1].ball[slp.drawn[d]].freqScore) + "       ",end="")
-        print(strformat.rjnum(slp.ball[slp.drawn[d]].freqScore) + "         ",end="")
-        print(strformat.rjnum(slp.col[d+1].ball[slp.drawn[d]].diffScore) + "        ",end="")
-        print(strformat.rjnum(slp.ball[slp.drawn[d]].diffScore))
+        print(str(d + 1) + "     " + strformat.rjtwo(inList[d]) + "    ", end="")
+        print(strformat.rjlist(slp.col[d+1].ball[inList[d]].lastThreeDiffs) + "      ",end="")
+        print(strformat.rjnum(slp.col[d+1].ball[inList[d]].freqScore) + "       ",end="")
+        print(strformat.rjnum(slp.ball[inList[d]].freqScore) + "         ",end="")
+        print(strformat.rjnum(slp.col[d+1].ball[inList[d]].diffScore) + "        ",end="")
+        print(strformat.rjnum(slp.ball[inList[d]].diffScore))
+
+        
 def printdiffs(c):
     if c == 6:
         for x in range(1,26):
@@ -261,6 +273,18 @@ def printdiffs(c):
             if x < 10:
                 print(" ",end="")
             print(str(x) + "     " + str(slp.col[c].ball[x].diffScore))
+
+def graphDist(c,b):
+    y1=slp.col[c].ball[b].diffMatrix
+    x1=[]
+    for x in range(0,len(slp.col[c].ball[b].diffMatrix)):
+        x1.append(x)
+    plt.plot(x1,y1,label = "Diff Dist", color="red")
+    plt.xlabel("Diff Order")
+    plt.ylabel("Diff Mag")
+    plt.title("Diff Plot for Col# " + str(c) + " Ball# " + str(b))
+    plt.legend()
+    plt.show()
     
 #####################################
 ########## END FUNCTIONS ############
@@ -284,7 +308,6 @@ for drawNum in range(slp.firstDraw,slp.lastDraw - testLen + 1):
     for c in range(1,7):  # read one line at time, feed each number into balls
         currentBallIndex=int(charLineData[c])
         slp.readInNumber(c,drawNumber,currentBallIndex)
-
 for c in range(1,7):  #Frequency Scoring
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getFreqScore(c)
@@ -292,6 +315,7 @@ for c in range(1,7):  #Frequency Scoring
             slp.getFreqScore(b)
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
+        slp.col[c].ball[b].getMeanDiff()
         slp.col[c].ball[b].getDiffScore()
         if c == 1:  #Matrix...no columns
             slp.ball[b].getDiffScore()            
@@ -300,7 +324,6 @@ for c in range(1,7):
         slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
         if c == 1:  #Matrix...no columns
             slp.ball[b].totalUpScore(b)
-
 slp.getUnsortedScores()  #Matrix
 slp.sortScores()
 for c in range(1,7):    #   Columns
