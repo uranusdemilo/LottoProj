@@ -23,7 +23,6 @@ class matrix:
         self.unsortedScores={}
         self.sortedHits={}
         self.freqScoreMult=1
-        self.diffScoreMult=3
         self.lastDraw=0
         self.numDraws=0
         self.drawn=[]
@@ -227,7 +226,7 @@ def scoreDraw(pred,drawn):
         payout = 0
         predMega=pred[5]
         drawnMega=drawn[5]
-        for p in range(0,5): #Only 4...do not do mega
+        for p in range(0,5): #Only 0-4...do not do mega
             if drawn[p] in pred:
                 drawHits += 1
         if predMega==drawnMega:
@@ -285,7 +284,29 @@ def graphDist(c,b):
     plt.title("Diff Plot for Col# " + str(c) + " Ball# " + str(b))
     plt.legend()
     plt.show()
-    
+
+def graphAll(ballNum):
+    x=[]
+    y=[]
+    for n in range(1,7):
+        y.append(slp.col[n].ball[ballNum].diffMatrix) #Y axis plot
+        x.append([l for l in range(1,len(slp.col[n].ball[ballNum].diffMatrix) + 1)]) #X-axis incrementals
+        #print("Column " + str(n))
+        #print(x[n-1])
+        print(n)
+    plt.plot(x[0],y[0],label = "Column 1", color="red")
+    plt.plot(x[1],y[1],label = "Column 2", color="orange")
+    plt.plot(x[2],y[2],label = "Column 3", color="yellow")
+    plt.plot(x[3],y[3],label = "Column 4", color="green")
+    plt.plot(x[4],y[4],label = "Column 5", color="blue")
+    plt.plot(x[5],y[5],label = "Column 6", color="indigo")
+    #plt.plot(x[0],y[0],label = "Column 7", color="violet")
+    plt.xlabel("Diff Order")
+    plt.ylabel("Diff Magnitude")
+    plt.title("Diff Plot for Ball# " + str(ballNum))
+    plt.legend()
+    plt.show()
+   
 #####################################
 ########## END FUNCTIONS ############
 #####################################    
@@ -373,7 +394,9 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     strformat.printList(slp.predicted)
     print("   " + str(payout))
     slp.runningPayout += payout
-print("************")
+print("**********************")
+print("Current Parameters")
+print("**********************")
 print("Running Payout=   " + str(slp.runningPayout))
 print("**********************")
 print("Numbers Drawn Alalysis")
