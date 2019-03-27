@@ -1,5 +1,4 @@
 import operator
-import statistics
 import strformat
 import matplotlib.pyplot as plt
 
@@ -16,7 +15,7 @@ class matrix:
         self.col.append(col(27)) #Create Mega with 27
         self.leastCommonBall=0; self.mostCommonBall=0
         self.leastCommonHits=0; self.mostCommonHits=0
-        self.firstDraw=1375
+        self.firstDraw=2375
         self.currentDraw=self.firstDraw-1
         self.currentDiffCol=0
         self.currentDiffMat=0
@@ -158,7 +157,7 @@ class lottoBall:
         self.hitMatrix=[]
         self.diffMatrix=[]
         self.freqScoreMult=1
-        self.diffScoreMult=3
+        self.diffScoreMult=2.5
         self.meanDiff=0
         self.lastHit=0
         self.lastThreeDiffs=[]
@@ -170,10 +169,11 @@ class lottoBall:
         self.counter=0
 
     def getMeanDiff(self):
+        self.counter=0
         self.runningTotal=0
         for d in self.diffMatrix:
             if d > self.outlier:
-                d == 150
+                d == self.outlier
             self.counter +=1
             self.runningTotal += d
         self.meanDiff=self.runningTotal/self.counter
@@ -281,7 +281,7 @@ def graphDist(c,b):
         x1.append(x)
     plt.plot(x1,y1,label = "Diff Dist", color="red")
     plt.xlabel("Diff Order")
-    plt.ylabel("Diff Mag")
+    plt.ylabel("Diff Magnitude")
     plt.title("Diff Plot for Col# " + str(c) + " Ball# " + str(b))
     plt.legend()
     plt.show()
@@ -318,6 +318,7 @@ for c in range(1,7):
         slp.col[c].ball[b].getMeanDiff()
         slp.col[c].ball[b].getDiffScore()
         if c == 1:  #Matrix...no columns
+            slp.ball[b].getMeanDiff()
             slp.ball[b].getDiffScore()            
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
@@ -350,8 +351,10 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
                 slp.getFreqScore(b)
     for c in range(1,7):
         for b in range(1,slp.col[c].numBalls + 1):
+            slp.col[c].ball[b].getMeanDiff()
             slp.col[c].ball[b].getDiffScore()
             if c == 1:  #Matrix...no columns
+                slp.ball[b].getMeanDiff()
                 slp.ball[b].getDiffScore()
     for c in range(1,7):
         for b in range(1,slp.col[c].numBalls + 1):
