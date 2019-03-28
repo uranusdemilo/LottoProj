@@ -1,5 +1,6 @@
 import operator
 import strformat
+import lottoUtils
 import matplotlib.pyplot as plt
 
 class matrix:
@@ -22,12 +23,14 @@ class matrix:
         self.unsortedHits={}
         self.unsortedScores={}
         self.sortedHits={}
-        self.freqScoreMult=1
+        self.diffScoreMult=2 #For Balls Instatinated in Mat
+        self.freqScoreMult=1 #For Balls Instatinated in Mat
         self.lastDraw=0
         self.numDraws=0
         self.drawn=[]
         self.predicted=[0,0,0,0,0,0]
         self.mostProbable=[]
+        self.winningCombos={0:0,1:0,10:0,11:0,20:0,21:0,30:0,31:0,40:0,41:0,50:0,51:0,6:0}
         self.runningPayout = 0
         for b in range(1,48):
             self.ball.append(lottoBall(b)) #instantiate ball b
@@ -118,6 +121,8 @@ class col:
         self.unsortedScores={}
         self.sortedScores={}
         self.sortedHits={}
+        self.diffScoreMult=2 #For Balls Instatinated in Col
+        self.freqScoreMult=1 #For Balls Instatinated in Col
         self.total=0
         ###Instantiate Balls in Row
         for b in range(1,self.numBalls + 1):
@@ -156,7 +161,6 @@ class lottoBall:
         self.hitMatrix=[]
         self.diffMatrix=[]
         self.freqScoreMult=1
-        self.diffScoreMult=2.5
         self.meanDiff=0
         self.lastHit=0
         self.lastThreeDiffs=[]
@@ -182,7 +186,7 @@ class lottoBall:
             del self.lastThreeDiffs[0]
         self.lastThreeDiffs.append(currentDiff)
 
-    def getDiffScore(self):
+    def getDiffScore(self,mult):
         # < than mean
         self.diffScore=0
         if self.lastThreeDiffs[1] < self.meanDiff:
@@ -206,7 +210,7 @@ class lottoBall:
                 self.diffScore  += .2
         if self.lastThreeDiffs[1] > self.meanDiff and self.lastThreeDiffs[2] < self.meanDiff:
             self.diffScore += .1
-        self.diffScore=self.diffScoreMult*(self.diffScoreMult * (round(self.diffScore,4)))
+        self.diffScore=(mult * (round(self.diffScore,4)))
 
     def getFreqScore(self,c):
         self.freqScore=self.freqScoreMult * (self.hits - slp.col[c].leastCommonHits)/(slp.col[c].mostCommonHits-slp.col[c].leastCommonHits)
@@ -222,7 +226,7 @@ def file_len(fname): #Get Number of Draws in File
 
 def scoreDraw(pred,drawn):
         drawHits = 0
-        megaHit = 0
+        megaHit = False
         payout = 0
         predMega=pred[5]
         drawnMega=drawn[5]
@@ -230,19 +234,43 @@ def scoreDraw(pred,drawn):
             if drawn[p] in pred:
                 drawHits += 1
         if predMega==drawnMega:
-            megaHit = 1
-        if drawHits == 0 and megaHit == 0:payout = 0
-        elif drawHits == 1 and megaHit == 0:payout = 0
-        elif drawHits == 0 and megaHit == 1:payout = 1
-        elif drawHits == 1 and megaHit == 1:payout = 2
-        elif drawHits == 2 and megaHit == 0:payout = 0
-        elif drawHits == 2 and megaHit == 1:payout = 10
-        elif drawHits == 3 and megaHit == 0:payout = 12
-        elif drawHits == 3 and megaHit == 1:payout = 47
-        elif drawHits == 4 and megaHit == 0:payout = 89
-        elif drawHits == 4 and megaHit == 1:payout = 1050
-        elif drawHits == 5 and megaHit == 0:payout = 18000
-        else:payout = 1000000
+            megaHit = True
+        if drawHits == 0 and megaHit == False:
+            payout = 0
+            slp.winningCombos[0] += 1
+        elif drawHits == 0 and megaHit == True:
+            payout = 1
+            slp.winningCombos[1] += 1
+        elif drawHits == 1 and megaHit == False:
+            payout = 0
+            slp.winningCombos[10] += 1
+        elif drawHits == 1 and megaHit == True:
+            payout = 2
+            slp.winningCombos[11] += 1
+        elif drawHits == 2 and megaHit == False:
+            payout = 0
+            slp.winningCombos[20] += 1
+        elif drawHits == 2 and megaHit == True:
+            payout = 10
+            slp.winningCombos[21] += 1
+        elif drawHits == 3 and megaHit == False:
+            payout = 12
+            slp.winningCombos[30] += 1
+        elif drawHits == 3 and megaHit == True:
+            payout = 47
+            slp.winningCombos[31] += 1
+        elif drawHits == 4 and megaHit == False:
+            payout = 89
+            slp.winningCombos[40] += 1
+        elif drawHits == 4 and megaHit == True:
+            payout = 1050
+            slp.winningCombos[41] += 1
+        elif drawHits == 5 and megaHit == False:
+            payout = 18000
+            slp.winningCombos[50] += 1
+        else:
+            payout = 1000000
+            slp.winningCombos[51] += 1
         return payout
 
 def adraw(inList): #Alalyze Final Draw 
@@ -314,7 +342,7 @@ def graphAll(ballNum):
 slp=matrix()
 drawAndDate=[]
 charLineData=[]
-testLen=100
+testLen=200
 slp.numDraws=file_len("allnumbers.txt")
 slp.lastDraw=slp.firstDraw + slp.numDraws - 1
 inFile=open("allnumbers.txt")
@@ -337,10 +365,10 @@ for c in range(1,7):  #Frequency Scoring
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].getMeanDiff()
-        slp.col[c].ball[b].getDiffScore()
+        slp.col[c].ball[b].getDiffScore(slp.col[c].diffScoreMult)
         if c == 1:  #Matrix...no columns
             slp.ball[b].getMeanDiff()
-            slp.ball[b].getDiffScore()            
+            slp.ball[b].getDiffScore(slp.diffScoreMult)            
 for c in range(1,7):
     for b in range(1,slp.col[c].numBalls + 1):
         slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
@@ -373,10 +401,10 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     for c in range(1,7):
         for b in range(1,slp.col[c].numBalls + 1):
             slp.col[c].ball[b].getMeanDiff()
-            slp.col[c].ball[b].getDiffScore()
+            slp.col[c].ball[b].getDiffScore(slp.col[c].diffScoreMult)
             if c == 1:  #Matrix...no columns
                 slp.ball[b].getMeanDiff()
-                slp.ball[b].getDiffScore()
+                slp.ball[b].getDiffScore(slp.diffScoreMult)
     for c in range(1,7):
         for b in range(1,slp.col[c].numBalls + 1):
             slp.col[c].ball[b].totalUpScore(b) #pass ball arg for matrix ball
@@ -391,11 +419,14 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     payout=scoreDraw(slp.predicted,slp.drawn)
     print(str(drawNumber) + "   ",end="")
     strformat.printList(slp.drawn)
+    print(",",end="")
     strformat.printList(slp.predicted)
     print("   " + str(payout))
     slp.runningPayout += payout
 print("**********************")
-print("Current Parameters")
+print("Winning Combos")
+print("**********************")
+lottoUtils.winningDraws(slp.winningCombos)
 print("**********************")
 print("Running Payout=   " + str(slp.runningPayout))
 print("**********************")

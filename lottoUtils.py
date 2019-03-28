@@ -1,0 +1,13 @@
+def winningDraws(winningCombos):
+    print("no hits     :  " + str(winningCombos[0]))
+    print("0 &  Mega   :  " + str(winningCombos[1]))
+    print("1 & No Mega :  " + str(winningCombos[10]))
+    print("1 & Mega    :  " + str(winningCombos[11]))
+    print("2 & no Mega :  " + str(winningCombos[20]))
+    print("2 & Mega    :  " + str(winningCombos[21]))
+    print("3 & no Mega :  " + str(winningCombos[30]))
+    print("3 & Mega    :  " + str(winningCombos[31]))
+    print("4 & no Mega :  " + str(winningCombos[40]))
+    print("4 &  Mega   :  " + str(winningCombos[41]))
+    print("5 & no Mega :  " + str(winningCombos[50]))
+    print("5 & Mega    :  " + str(winningCombos[51]))      
