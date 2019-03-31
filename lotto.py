@@ -424,7 +424,7 @@ for postLoop in range(slp.currentDraw,slp.lastDraw):
     print("   " + str(payout))
     slp.runningPayout += payout
 print("**********************")
-print("Winning Combos")
+print("Test Run Summary")
 print("**********************")
 lottoUtils.winningDraws(slp.winningCombos)
 print("**********************")
@@ -439,7 +439,7 @@ inFile.close()
 outFile.close()
 
 
-#Last Line = 3328
+#Last Line = 3336
 #outFile.write(str(drawNumber) + "\n")
 #slpdraws.newDraw(drawNumber,pred,drawn)
 
