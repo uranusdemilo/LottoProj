@@ -439,9 +439,13 @@ inFile.close()
 outFile.close()
 
 
+<<<<<<< HEAD
+#Last Line = 3328
+=======
 #Last Line = 3336
 #outFile.write(str(drawNumber) + "\n")
 #slpdraws.newDraw(drawNumber,pred,drawn)
 
 #self.probScore=self.freqScore + self.diffScore
 #print("testthis".rjust(20,'-'))
+>>>>>>> a8de66db428ad55e6a2657ef2b607fa20ea0af7c
