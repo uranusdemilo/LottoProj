@@ -301,6 +301,17 @@ def printdiffs(c):
                 print(" ",end="")
             print(str(x) + "     " + str(slp.col[c].ball[x].diffScore))
 
+def domp():
+    for c in range(1,7):
+        print("****COL " + str(c) + "******")
+        most1=slp.col[c].sortedHits[-1][0]
+        most2=slp.col[c].sortedHits[-2][0]
+        most3=slp.col[c].sortedHits[-3][0]
+        print(str(most1) + "   " + str(slp.col[c].ball[most1].lastThreeDiffs))
+        print(str(most2) + "   " + str(slp.col[c].ball[most2].lastThreeDiffs))
+        print(str(most3) + "   " + str(slp.col[c].ball[most3].lastThreeDiffs))
+
+
 def graphDist(c,b):
     y1=slp.col[c].ball[b].diffMatrix
     x1=[]
@@ -439,13 +450,10 @@ inFile.close()
 outFile.close()
 
 
-<<<<<<< HEAD
 #Last Line = 3328
-=======
 #Last Line = 3336
 #outFile.write(str(drawNumber) + "\n")
 #slpdraws.newDraw(drawNumber,pred,drawn)
 
 #self.probScore=self.freqScore + self.diffScore
 #print("testthis".rjust(20,'-'))
->>>>>>> a8de66db428ad55e6a2657ef2b607fa20ea0af7c
