@@ -458,10 +458,4 @@ adraw(slp.predicted)
 inFile.close()
 outFile.close()
 
-
-#Last Line = 3328
-#Last Line = 3336
-#outFile.write(str(drawNumber) + "\n")
-#slpdraws.newDraw(drawNumber,pred,drawn)
-
-#self.probScore=self.freqScore + self.diffScore
+#Last Line = 3345
